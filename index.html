@@ -261,7 +261,7 @@ async function decode(f,op){const sig=op.sig,u=URLs.make(f,'up'),HB=!!self.creat
  finally{rel(s);if(keep!==u)URLs.drop(u,'up')}}
 /* um único processamento por vez; resultados de operações invalidadas são descartados */
 let busy=0,OP;const dz=$('drop'),setBusy=v=>{busy=v;['pick','pvg','pvr'].forEach(i=>$(i).disabled=!!v);dz.setAttribute('aria-busy',!!v)};
-async function pick(f){if(!f)return;if(busy)return er('Aguarde: a foto anterior ainda está sendo processada.');er('');st('');
+async function pick(f){if(!f){$('file').value='';return}if(busy)return er('Aguarde: a foto anterior ainda está sendo processada.');er('');st('');
  const op=OP={ac:new AbortController(),to:0};op.sig=op.ac.signal;const tm=setTimeout(()=>{op.to=1;op.ac.abort()},CFG.tmo);setBusy(1);let k='?',r;
  try{
   if(f.size>CFG.maxMB*1048576)throw E('size');
@@ -277,10 +277,10 @@ async function pick(f){if(!f)return;if(busy)return er('Aguarde: a foto anterior 
   if(op.to)c='timeout';else if(!c||c==='decode'){const n=x&&x.name;
    if(n==='NotReadableError'||n==='NotFoundError')c='cloud';else if(n==='RangeError'||/memory|alloc/i.test(x&&x.message||''))c='oom';
    else c=k==='heic'?'heic':k==='?'?'unk':await trunc(f,k)?'corrupt':'decode'}
-  er(M[c]||`Não foi possível decodificar esta imagem (${k}, ${(f.size/1048576).toFixed(1)} MB). Se ela estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o aparelho; se for muito grande, reduza a resolução e envie de novo.`)
- }finally{clearTimeout(tm);if(OP===op)OP=null;setBusy(0);st('')}}
-/* o valor do input é limpo na hora (permite reescolher o mesmo arquivo, inclusive após erro); File continua válido */
-$('pick').onclick=()=>$('file').click();$('file').onchange=e=>{const f=e.target.files[0];e.target.value='';pick(f)};$('pvr').onclick=free;
+  er((c==='cloud'?NUBE+` [${x&&x.name||'sem arquivo'}]`:M[c])||`Não foi possível decodificar esta imagem (${k}, ${(f.size/1048576).toFixed(1)} MB). Se ela estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o aparelho; se for muito grande, reduza a resolução e envie de novo.`)
+ }finally{clearTimeout(tm);if(OP===op)OP=null;$('file').value='';setBusy(0);st('')}}
+/* o input só é limpo no fim do processamento (sucesso ou erro): limpar antes pode invalidar a leitura de arquivos content:// no Android */
+$('pick').onclick=()=>$('file').click();$('file').onchange=e=>pick(e.target.files[0]);$('pvr').onclick=free;
 $('pvg').onclick=()=>{const o=up;if(o&&!busy)openCfg({id:o.id,name:o.name,src:o.src,cat:'personalizado'})};
 dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov')};dz.ondragleave=()=>dz.classList.remove('ov');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov');pick(e.dataTransfer.files[0])};
 addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>e.preventDefault());
