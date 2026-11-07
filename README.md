@@ -1,45 +1,73 @@
 # Quebra-Cabeças
 
-Jogo de quebra-cabeças (jigsaw) em HTML, CSS e JavaScript puros, sem dependências, pronto para hospedagem estática (GitHub Pages, raiz ou subdiretório).
+Jogo de quebra-cabeças (jigsaw) em HTML, CSS e JavaScript puros, sem dependências, pronto para hospedagem estática no GitHub Pages.
 
 ## Funcionalidades
-- Peças reais com encaixes (curvas de Bézier compartilhadas entre vizinhas), desenhadas com `clip-path: path()`.
-- Arrastar com mouse, toque ou caneta (Pointer Events); encaixe automático com tolerância configurável (`CFG.tol`); peças vizinhas formam grupos. No teclado, Tab leva a uma peça solta aleatória (Shift+Tab volta aos botões) e as setas movem a peça.
-- Modo clássico e modo desafio (rotação de 90°: tecla `R`, botão Girar ou duplo toque/clique na peça; só encaixa na orientação correta). Desafio vem desligado.
-- Modo fantasma (imagem translúcida de 20% a 40% alinhada ao tabuleiro), imagem de referência ampliável, bordas, dica, organizar e ajustar tabuleiro.
-- Cronômetro com pausa, tela de vitória com confetes, tema claro/escuro e respeito a movimento reduzido.
-- Placar local (`localStorage`), separado em Modelos e Personalizados, com top 10 por imagem, quantidade de peças e modo.
-- Envio de foto própria (JPG, PNG, WEBP, AVIF, até 15 MB), processada só no navegador e reduzida a no máximo 2560 px no lado maior (o arquivo original não é alterado); o placar usa o SHA-256 do arquivo como identificador.
+
+- Peças com encaixes, desenhadas com `clip-path: path()`.
+- Arrastar com mouse, toque ou caneta; encaixe automático e agrupamento de peças vizinhas.
+- Modo clássico e modo desafio, com rotação de 90°.
+- Modo fantasma, imagem de referência ampliável, bordas, dica, organizar e ajustar tabuleiro.
+- Cronômetro com pausa, tela de vitória, tema claro/escuro e respeito a movimento reduzido.
+- Placar local (`localStorage`), separado em Modelos e Personalizados.
+- Envio de foto própria (JPG, PNG, WEBP ou AVIF, até 15 MB), processada no próprio navegador.
+- Galeria com links de imagem cadastrados manualmente no `index.html`, sem catálogo JSON e sem consulta à API do GitHub.
 
 ## Estrutura
-```
-index.html                  # aplicação (CSS e JS inline)
-scripts/generate-gallery.mjs
-public/data/gallery.json    # gerado pelo script
-public/images/puzzles/      # imagens do catálogo
+
+```text
+index.html                  # aplicação e lista manual de imagens
+public/images/puzzles/      # imagens usadas na galeria
 ```
 
-## Adicionar imagens e atualizar o catálogo
-1. Copie as imagens (JPG, JPEG, PNG, WEBP ou AVIF) para `public/images/puzzles/`. Coloque também `A Arca de Noé.png`: ela sempre será a primeira da galeria.
-2. Rode `node scripts/generate-gallery.mjs` (Node 18 ou superior). O script é idempotente e avisa se `A Arca de Noé.png` estiver ausente.
-3. O nome exibido é o nome do arquivo sem a extensão, com acentos preservados.
-4. Sem Node (por exemplo, pelo celular)? No GitHub Pages o site lista a pasta `public/images/puzzles/` sozinho pela API pública do GitHub. Se isso falhar, ele usa a lista `FALLBACK` no `index.html`, onde você escreve o nome dos arquivos.
+## Adicionar, remover ou reordenar imagens
+
+1. Coloque a imagem em `public/images/puzzles/`.
+2. Abra `index.html` e procure por `const FILES = [`.
+3. Adicione um objeto com `id`, `name` e `src`.
+4. Em `src`, informe o caminho relativo completo do arquivo, codificando espaços e caracteres especiais na URL.
+5. Salve o arquivo. A ordem dos objetos em `FILES` é a ordem da galeria.
+
+Exemplo:
+
+```javascript
+const FILES=[
+ {
+  id:'a-arca-de-noe',
+  name:'A Arca de Noé',
+  src:'public/images/puzzles/A%20Arca%20de%20No%C3%A9.png'
+ },
+ {
+  id:'criancas-brincando-no-parque',
+  name:'Crianças Brincando no Parque',
+  src:'public/images/puzzles/Crian%C3%A7as%20Brincando%20no%20Parque.png'
+ },
+ {
+  id:'minha-nova-imagem',
+  name:'Minha Nova Imagem',
+  src:'public/images/puzzles/Minha%20Nova%20Imagem.jpg'
+ }
+];
+```
+
+Os exemplos acima incluem as duas imagens já cadastradas e uma terceira imagem ilustrativa. Troque o terceiro registro pelo nome e caminho reais do arquivo que você adicionar. O nome mostrado na galeria é o valor de `name`; ele não precisa incluir a extensão.
+
+O arquivo precisa existir exatamente no caminho informado. Os arquivos guardados na pasta, mas não cadastrados em `FILES`, não aparecem na galeria.
+
+## Sobre o carregamento das miniaturas
+
+As miniaturas usam `loading="lazy"` e `decoding="async"`, recursos nativos do navegador. Não há `IntersectionObserver` personalizado, leitura de `gallery.json` nem consulta à API do GitHub para descobrir as imagens. A imagem original continua sendo utilizada na montagem do quebra-cabeça.
 
 ## Executar localmente
-Use um servidor estático (o catálogo é carregado com `fetch`, então `file://` não funciona):
-`python3 -m http.server 8000` e abra `http://localhost:8000`.
 
-## Publicar no GitHub Pages
-Envie o projeto ao repositório, abra Settings > Pages e escolha a branch e a pasta raiz. Todos os caminhos são relativos, então funciona em `usuario.github.io/repositorio/`.
+Abra o projeto por um servidor HTTP local. Por exemplo, com Python:
 
-## Como funciona
-- **Grade:** escolhe colunas e linhas que deixam as peças o mais próximo possível de um quadrado, informa a quantidade real e nunca distorce a imagem (o tabuleiro tem a proporção da foto).
-- **Geometria:** cada aresta interna tem sentido de encaixe e pequenas variações aleatórias (semente por partida). Peças vizinhas usam a mesma curva, uma percorrida em sentido inverso, então os recortes sempre se complementam. Bordas externas são retas.
-- **Rotação:** a peça gira em torno do próprio centro; o encaixe e o agrupamento só valem com rotação 0°.
-- **Distribuição:** as peças são espalhadas fora do tabuleiro, sempre dentro da área visível, e reposicionadas se a tela mudar de tamanho.
+```bash
+python -m http.server 8000
+```
 
-## Limitações conhecidas
-Sem salvamento automático de partidas em andamento, sem bandejas de peças com rolagem e sem miniaturas redimensionadas (o navegador reduz as imagens originais). Fotos HEIC/HEIF só abrem em navegadores que as suportam; no Android, exporte como JPG.
+Depois, acesse `http://localhost:8000`.
 
 ## Créditos
+
 Desenvolvimento: Eliseu Fernandes Laurindo — https://eliseuangelos.github.io

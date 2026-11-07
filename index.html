@@ -64,7 +64,6 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 </head>
 <body>
 <header><h1>Quebra-Cabeças</h1><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mt" aria-label="Alternar tema claro ou escuro">Tema</button></header>
-
 <main id="home" class="v"><div class="w">
 <section><h2>Crie seu próprio quebra-cabeça</h2>
 <div id="drop"><input id="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
@@ -74,24 +73,20 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <p id="er" class="er" role="alert"></p></div></section>
 <section><h2>Galeria</h2><input id="q" type="search" placeholder="Buscar por nome" aria-label="Buscar imagem pelo nome"><div id="gal"></div><p id="gm" class="m"></p></section>
 </div></main>
-
 <div id="game" class="v" hidden>
 <div id="hud"><span id="tm" role="timer">00:00</span><button id="bp">Pausar</button><button id="br">Reiniciar</button><button id="bg" aria-pressed="false">Fantasma</button><input id="gr" type="range" min="20" max="40" value="30" aria-label="Transparência do modo fantasma"><button id="bi" aria-pressed="true">Referência</button><button id="be" aria-pressed="false">Bordas</button><button id="bh">Dica</button><button id="bo">Organizar</button><button id="bt">Girar</button><button id="bf">Ajustar</button><button id="thb" aria-label="Ampliar a imagem de referência"><img id="th" alt=""></button></div>
 <div id="stage"><div id="board"></div><div id="ghost"></div><div id="hint"></div><div id="pause" hidden><b>Jogo pausado</b><button id="bc" class="pri">Continuar</button></div></div>
 </div>
-
 <dialog id="cfg"><h2 id="ct"></h2><img id="ci" alt="">
 <label>Peças <select id="np"></select></label><p id="real" class="m"></p>
 <label><input type="checkbox" id="ch"> Modo desafio (as peças começam giradas)</label>
 <label><input type="checkbox" id="gh"> Modo fantasma ligado</label>
 <label><input type="checkbox" id="rf" checked> Mostrar imagem de referência</label>
 <menu><button data-x>Cancelar</button><button id="go" class="pri">Iniciar jogo</button></menu></dialog>
-
 <dialog id="sd"><h2>Placar</h2>
 <div><button id="c1" aria-pressed="true">Modelos</button> <button id="c2" aria-pressed="false">Personalizados</button></div>
 <p><select id="fm" aria-label="Modo"><option value="">Todos os modos<option value="classico">Clássico<option value="desafio">Desafio</select> <select id="fn" aria-label="Quantidade de peças"></select> <select id="fi" aria-label="Imagem"></select></p>
 <div id="sl"></div><menu><button id="sc">Limpar recordes</button><button data-x class="pri">Fechar</button></menu></dialog>
-
 <dialog id="hd"><h2>Explicação</h2><ul>
 <li>Escolha uma foto da galeria ou envie a sua, defina o número de peças e inicie o jogo.
 <li>Arraste as peças com o mouse ou o dedo. Perto da posição correta, elas encaixam sozinhas. Peças vizinhas se unem e se movem juntas.
@@ -99,16 +94,13 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <li>Fantasma mostra a imagem translúcida sobre o tabuleiro. Dica destaca onde a peça selecionada vai. Bordas mostra só as peças externas. Organizar espalha as peças soltas. Ajustar muda o tamanho do tabuleiro.
 <li>Teclado: Tab vai para uma peça solta aleatória (Shift+Tab volta aos botões) e as setas movem a peça (Shift para passos maiores).</ul>
 <menu><button data-x class="pri">Fechar</button></menu></dialog>
-
 <dialog id="cd"><h2>Créditos</h2><p>Desenvolvimento: Eliseu Fernandes Laurindo</p>
 <p>Site pessoal: <a href="https://eliseuangelos.github.io" target="_blank" rel="noopener noreferrer">https://eliseuangelos.github.io</a></p>
 <menu><button data-x class="pri">Fechar</button></menu></dialog>
 
 <dialog id="pd"><img id="pdi" alt="Imagem completa"><menu><button data-x class="pri">Fechar</button></menu></dialog>
-
 <dialog id="win"><canvas id="cf"></canvas><h2>Parabéns! Você conseguiu!</h2><img id="wi" alt="Quebra-cabeça concluído"><p id="wt"></p><p id="wm" class="m"></p>
 <div><button id="wa" class="pri">Jogar novamente</button> <button id="wo">Escolher outra imagem</button></div></dialog>
-
 <script>
 (()=>{
 const $=i=>document.getElementById(i),CFG={maxMB:15,tol:.3,minPx:200,maxPx:2560,counts:[12,24,48,72,100,150,200]},SK='jigsaw.scores.v1',
@@ -121,13 +113,11 @@ ld=()=>{try{return JSON.parse(ls(SK)||'[]')}catch{return[]}},
 mul=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296},
 stage=$('stage'),KS=[1,.8,.65],D=[[1,0],[-1,0],[0,1],[0,-1]];
 let items=[],cur,up,P=[],EH,EV,N,N0=48,cols,rows,IW,IH,L,SW,SH,game,paused,won,chal,sel,drag,Z,placed,ki,ghostOn,el0=0,t0=0,ht,sc='modelo',tabEntry,lastTap;
-
 /* tema e diálogos */
 const setTh=t=>{document.documentElement.dataset.theme=t;ls('theme',t)};
 setTh(ls('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
 $('mt').onclick=()=>setTh(document.documentElement.dataset.theme==='dark'?'light':'dark');
 document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
-
 /* cronômetro */
 const now=()=>el0+(t0?performance.now()-t0:0),run=()=>{t0||(t0=performance.now())},stop=()=>{el0=now();t0=0};
 function setPause(v){if(!game||won)return;paused=v;$('pause').hidden=!v;$('bp').textContent=v?'Continuar':'Pausar';v?stop():run()}
@@ -135,34 +125,61 @@ setInterval(()=>{if(game)$('tm').textContent=fmt(now())},250);
 document.onvisibilitychange=()=>document.hidden&&setPause(true);
 const modal=d=>{setPause(true);$(d).showModal()};
 $('bp').onclick=()=>setPause(!paused);$('bc').onclick=()=>setPause(false);
-
 /* menu */
 function home(){if(cur&&cur.cat==='personalizado'&&(!up||up.src!==cur.src))URL.revokeObjectURL(cur.src);game=false;won=false;stop();el0=0;P.forEach(p=>p.el.remove());P=[];$('game').hidden=true;$('home').hidden=false}
 $('mn').onclick=()=>{if(game&&!won&&!confirm('Descartar a partida em andamento?'))return;home()};
 $('ms').onclick=()=>{rs();modal('sd')};$('mh').onclick=()=>modal('hd');$('mc').onclick=()=>modal('cd');
 
-/* galeria (lê somente public/data/gallery.json) */
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.src=e.target.dataset.src;io.unobserve(e.target)}}),{rootMargin:'250px'});
-function render(){const q=norm($('q').value);
- $('gal').replaceChildren(...items.filter(i=>norm(i.name).includes(q)).map(i=>{
-  const b=document.createElement('button'),n=document.createElement('span');b.className='card';b.innerHTML='<span class="ph"><img alt="" loading="lazy" decoding="async"></span>';n.textContent=i.name;b.append(n);
-  const im=b.querySelector('img');im.dataset.src=i.src;im.onload=()=>{i.src=im.getAttribute('src');b.classList.add('ok')};
-  im.onerror=()=>{const f=i.filename;if(f&&!im.dataset.r){im.dataset.r=1;im.src=IMG+encodeURIComponent(f.normalize(f===f.normalize('NFC')?'NFD':'NFC'))}else b.classList.add('bad')};io.observe(im);
-  b.onclick=()=>{document.querySelectorAll('.card.on').forEach(c=>c.classList.remove('on'));b.classList.add('on');openCfg({id:i.id,name:i.name,src:i.src,cat:'modelo'})};return b}));
- $('gm').textContent=items.length?'':'Nenhuma imagem encontrada.'}
+/* GALERIA: links diretos das imagens cadastrados manualmente neste arquivo. */
+/*
+  CADASTRO MANUAL DAS IMAGENS
+  - Cole cada endereço relativo completo no campo src.
+  - Os arquivos devem ficar em public/images/puzzles/.
+  - Use %20 para espaços e a codificação URL para caracteres acentuados.
+  - A ordem dos itens abaixo determina a ordem de exibição na galeria.
+*/
+const FILES=[
+ {
+  id:'a-arca-de-noe',
+  name:'A Arca de Noé',
+  src:'public/images/puzzles/A%20Arca%20de%20No%C3%A9.png'
+ },
+ {
+  id:'criancas-brincando-no-parque',
+  name:'Crianças Brincando no Parque',
+  src:'public/images/puzzles/Crian%C3%A7as%20Brincando%20no%20Parque.png'
+ }
+];
+
+items=FILES.map(image=>({...image}));
+
+function render(){
+ const q=norm($('q').value);
+ const cards=items.filter(i=>norm(i.name).includes(q)).map(i=>{
+  const b=document.createElement('button'),n=document.createElement('span');
+  b.className='card';
+  b.innerHTML='<span class="ph"><img alt="" loading="lazy" decoding="async"></span>';
+  n.textContent=i.name;
+  b.append(n);
+
+  const im=b.querySelector('img');
+  im.alt=i.name;
+  im.onload=()=>{b.classList.remove('bad');b.classList.add('ok')};
+  im.onerror=()=>b.classList.add('bad');
+  im.src=i.src;
+
+  b.onclick=()=>{
+   document.querySelectorAll('.card.on').forEach(c=>c.classList.remove('on'));
+   b.classList.add('on');
+   openCfg({id:i.id,name:i.name,src:i.src,cat:'modelo'});
+  };
+  return b;
+ });
+ $('gal').replaceChildren(...cards);
+ $('gm').textContent=items.length?'':'Nenhuma imagem encontrada.';
+}
 $('q').oninput=render;
-const IMG='public/images/puzzles/',FIRST='A Arca de Noé.png',EXT=/\.(jpe?g|png|webp|avif)$/i,
- FALLBACK=[FIRST], /* sem Node? escreva aqui os nomes dos arquivos de public/images/puzzles/, ex.: ['A Arca de Noé.png','Praia.jpg'] */
- mk=f=>({id:norm(f.replace(EXT,'')).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''),name:f.normalize('NFC').replace(EXT,''),filename:f,src:IMG+encodeURIComponent(f)}),
- order=a=>a.sort((x,y)=>(y.filename.normalize('NFC')===FIRST)-(x.filename.normalize('NFC')===FIRST)||x.name.localeCompare(y.name,'pt',{numeric:true,sensitivity:'base'}));
-async function loadGallery(){let l=[];
- try{const r=await fetch('public/data/gallery.json');if(r.ok)l=await r.json()}catch{}
- if(!l.length)try{const u=location.hostname.split('.')[0],rp=location.pathname.split('/')[1];
-  if(rp&&/\.github\.io$/.test(location.hostname)){const r=await fetch(`https://api.github.com/repos/${u}/${rp}/contents/public/images/puzzles`);
-   if(r.ok)l=order((await r.json()).filter(x=>x.type==='file'&&EXT.test(x.name)).map(x=>mk(x.name)))}}catch{}
- if(!l.length)l=FALLBACK.map(mk);
- items=l;render()}
-loadGallery();
+render();
 
 /* envio de foto (processamento local) */
 const er=m=>$('er').textContent=m;addEventListener('error',e=>er('Erro no script: '+e.message));
@@ -202,7 +219,6 @@ async function pick(f){er('');if(!f)return;
 $('pick').onclick=()=>$('file').click();$('file').onchange=e=>pick(e.target.files[0]);$('pvr').onclick=()=>{free();$('file').value=''};
 $('pvg').onclick=()=>up&&openCfg({id:up.id,name:up.name,src:up.src,cat:'personalizado'});
 const dz=$('drop');dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov')};dz.ondragleave=()=>dz.classList.remove('ov');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov');pick(e.dataTransfer.files[0])};
-
 /* configuração */
 function grid(n,w,h){let best,bc=1e9;for(let c=1;c<=n;c++)for(let r=1;r<=n;r++){const m=c*r;if(m<n*.8||m>n*1.25)continue;const k=Math.abs(Math.log(w/c/(h/r)))*4+Math.abs(m-n)/n;if(k<bc){bc=k;best=[c,r]}}return best}
 const upd=()=>{const[c,r]=grid(+$('np').value,cur.w,cur.h);$('real').textContent=`Serão geradas ${c*r} peças (${c} × ${r}).`};
@@ -211,7 +227,6 @@ function openCfg(it){const im=new Image();im.onload=()=>{cur={...it,w:im.natural
  im.onerror=()=>alert('Não foi possível carregar esta imagem.');im.src=it.src}
 $('np').onchange=upd;
 $('go').onclick=()=>{N0=+$('np').value;chal=$('ch').checked;$('cfg').close();begin()};
-
 /* geometria: bordas compartilhadas (Bézier) */
 function cv(x0,y0,x1,y1,e){const dx=x1-x0,dy=y1-y0,[a,b,c,d,f]=e.j,t=.1,s=e.s,Q=(l,w)=>[x0+dx*l-dy*w*s,y0+dy*l+dx*w*s],
  p=[Q(0,0),Q(.2,a),Q(.5+b+d,-t+c),Q(.5-t+b,t+c),Q(.5-2*t+b-d,3*t+c),Q(.5+2*t+b-d,3*t+c),Q(.5+t+b,t+c),Q(.5+b+d,-t+c),Q(.8,f),Q(1,0)];
@@ -224,7 +239,6 @@ function pathOf(p){const{cw,ch,pad}=L,x=p.c*cw,y=p.r*ch,ox=x-pad,oy=y-pad,f=q=>(
  for(let i=2;i>=0;i--){const k=B[i];d+=`C${f(k[2])} ${f(k[1])} ${f(k[0])}`}
  for(let i=2;i>=0;i--){const k=Lf[i];d+=`C${f(k[2])} ${f(k[1])} ${f(k[0])}`}
  return d+'Z'}
-
 /* partida */
 function begin(){
  P.forEach(p=>p.el.remove());P=[];L=null;sel=drag=null;placed=0;Z=10;ki=0;won=false;paused=false;stage.classList.remove('ed','fin');
@@ -241,7 +255,6 @@ function begin(){
  $('th').src=cur.src;$('thb').hidden=!$('rf').checked;$('bi').setAttribute('aria-pressed',$('rf').checked);
  setGhost($('gh').checked);$('ghost').style.opacity=$('gr').value/100;$('bt').hidden=!chal;$('be').setAttribute('aria-pressed',false);$('pause').hidden=true;$('bp').textContent='Pausar';
  $('home').hidden=true;$('game').hidden=false;game=true;el0=0;t0=0;run();layout()}
-
 function layout(){
  const R=stage.getBoundingClientRect();SW=R.width;SH=R.height;if(!SW||!SH||!P.length)return;
  const o=L,land=SW>SH*1.1,big=N>=100,s=Math.min(SW*(land?(big?.5:.62):.92)/IW,SH*(land?.8:big?.4:.5)/IH)*KS[ki],
@@ -257,7 +270,6 @@ function layout(){
  for(const p of P){if(p.k||seen.has(p.g))continue;seen.add(p.g);if(!o)scat(p);fit(p.g)}
  P.forEach(place)}
 new ResizeObserver(layout).observe(stage);
-
 const place=p=>{p.el.style.transform=`translate(${p.x-p.w/2}px,${p.y-p.h/2}px) rotate(${p.rot}deg)`},
 front=g=>g.forEach(q=>q.el.style.zIndex=++Z),
 pop=o=>{o.el.classList.add('s');setTimeout(()=>o.el.classList.remove('s'),450)};
@@ -266,7 +278,6 @@ function scat(p){const h=Math.max(p.w,p.h)/2;let x,y,i=0;
  p.x=x;p.y=y}
 function fit(g){let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const p of g){const h=Math.max(p.w,p.h)/2;a=Math.min(a,p.x-h);c=Math.max(c,p.x+h);b=Math.min(b,p.y-h);d=Math.max(d,p.y+h)}
  const dx=a<0?-a:c>SW?SW-c:0,dy=b<0?-b:d>SH?SH-d:0;for(const p of g){p.x+=dx;p.y+=dy}}
-
 /* encaixe e agrupamento */
 function lock(o){if(o.k)return;o.k=1;placed++;o.x=L.bx+(o.c+.5)*L.cw;o.y=L.by+(o.r+.5)*L.ch;place(o);o.el.classList.add('k');o.el.style.zIndex=1;o.el.tabIndex=-1;if(tabEntry===o)tabEntry=null;pop(o)}
 const fin=()=>{if(placed===N&&!won)win()};
@@ -277,7 +288,6 @@ function settle(p){
   const ex=n.x-dc*L.cw,ey=n.y-dr*L.ch;
   if(Math.hypot(q.x-ex,q.y-ey)<tol){const dx=ex-q.x,dy=ey-q.y;g.forEach(o=>{o.x+=dx;o.y+=dy;place(o);pop(o)});n.g.forEach(pop);const m=g.concat(n.g);m.forEach(o=>o.g=m);return settle(m[0])}}}
 function rot(p){if(!chal||!p||p.k||paused||won||p.g.length>1)return;p.rot+=90;place(p);settle(p)}
-
 /* ponteiro (mouse, toque e caneta) */
 /* Tab: só uma peça fica "tabulável" (sorteada entre as soltas), então a ordem do desenho não aparece */
 function randLoose(not){const u=P.filter(q=>!q.k&&q!==not&&(!stage.classList.contains('ed')||q.el.classList.contains('e')));return u.length?u[Math.random()*u.length|0]:(not&&!not.k?not:null)}
@@ -300,7 +310,6 @@ document.onkeydown=e=>{if(!game||paused||won||!sel||sel.k||e.target.closest('inp
  if(e.key==='r'||e.key==='R')return rot(sel);
  const m={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!m)return;e.preventDefault();
  const st=e.shiftKey?40:10;sel.g.forEach(q=>{q.x+=m[0]*st;q.y+=m[1]*st});fit(sel.g);sel.g.forEach(place);settle(sel)};
-
 /* controles da partida */
 function setGhost(v){ghostOn=v;$('ghost').style.display=v?'block':'none';$('bg').setAttribute('aria-pressed',v)}
 $('bg').onclick=()=>setGhost(!ghostOn);$('gr').oninput=e=>$('ghost').style.opacity=e.target.value/100;
@@ -315,7 +324,6 @@ $('bh').onclick=()=>{if(!game||paused||won)return;let p=sel&&!sel.k?sel:null;if(
  h.classList.add('on');clearTimeout(ht);ht=setTimeout(()=>h.classList.remove('on'),2500);front(p.g);pop(p)};
 $('bo').onclick=()=>{if(!game||paused||won)return;const seen=new Set();
  for(const p of P){if(p.k||seen.has(p.g))continue;seen.add(p.g);const x=p.x,y=p.y;scat(p);const dx=p.x-x,dy=p.y-y;p.g.forEach(q=>{if(q!==p){q.x+=dx;q.y+=dy}});fit(p.g);p.g.forEach(place)}};
-
 /* placar local */
 function save(ms){const a=ld(),e={cat:cur.cat,id:cur.id,name:cur.name,n:N,m:chal?'desafio':'classico',t:Math.round(ms),d:Date.now()};a.push(e);
  const g=a.filter(x=>x.cat===e.cat&&x.id===e.id&&x.n===e.n&&x.m===e.m).sort((x,y)=>x.t-y.t),drop=g.slice(10),rk=g.indexOf(e);
@@ -330,7 +338,6 @@ function rs(){const a=ld().filter(x=>x.cat===sc),fm=$('fm'),fn=$('fn'),fi=$('fi'
 [['c1','modelo'],['c2','personalizado']].forEach(([i,v])=>$(i).onclick=()=>{sc=v;$('c1').setAttribute('aria-pressed',v==='modelo');$('c2').setAttribute('aria-pressed',v!=='modelo');rs()});
 ['fm','fn','fi'].forEach(i=>$(i).onchange=rs);
 $('sc').onclick=()=>{if(confirm('Apagar todos os recordes?')){ls(SK,'[]');rs()}};
-
 /* vitória */
 function win(){won=true;stop();const ms=now(),r=save(ms);stage.classList.add('fin');
  $('wi').src=cur.src;$('wt').textContent=`Quebra-cabeça concluído em ${fmt(ms)}.`;$('wm').textContent=`${N} peças · ${chal?'Modo desafio':'Modo clássico'}${r?' · '+r:''}`;
