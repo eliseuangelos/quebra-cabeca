@@ -59,11 +59,12 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 #wi{max-width:92vw;max-height:55dvh;object-fit:contain;border-radius:10px;animation:gr .9s cubic-bezier(.2,.9,.3,1.2),gl 2s infinite alternate}
 @keyframes gr{from{transform:scale(.3);opacity:0}}@keyframes gl{from{box-shadow:0 0 20px #5fd0c055}to{box-shadow:0 0 60px #5fd0c0cc}}
 #cf{position:fixed;inset:0;pointer-events:none}
+.lite .p.up{filter:none}.lite .s .i,.lite .fin .i{animation:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<header><h1>Quebra-Cabeças</h1><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mt" aria-label="Alternar tema claro ou escuro">Tema</button></header>
+<header><h1>Quebra-Cabeças</h1><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mt" aria-label="Alternar tema claro ou escuro">Tema</button><button id="mu" aria-pressed="true" aria-label="Efeitos sonoros">🔊 Som</button></header>
 <main id="home" class="v"><div class="w">
 <section><h2>Crie seu próprio quebra-cabeça</h2>
 <div id="drop"><input id="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
@@ -103,7 +104,7 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <div><button id="wa" class="pri">Jogar novamente</button> <button id="wo">Escolher outra imagem</button></div></dialog>
 <script>
 (()=>{
-const $=i=>document.getElementById(i),CFG={maxMB:15,tol:.3,minPx:200,maxPx:2560,tmo:3e4,counts:[12,24,48,72,100,150,200]},SK='jigsaw.scores.v1',
+const $=i=>document.getElementById(i),CFG={maxMB:15,tol:.3,minPx:200,tmo:3e4,counts:[12,24,48,72,100,150,200]},SK='jigsaw.scores.v1',
 ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k):localStorage.setItem(k,v)}catch{}},
 RM=matchMedia('(prefers-reduced-motion:reduce)').matches,
 esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';'),
@@ -126,7 +127,7 @@ document.onvisibilitychange=()=>document.hidden&&setPause(true);
 const modal=d=>{setPause(true);$(d).showModal()};
 $('bp').onclick=()=>setPause(!paused);$('bc').onclick=()=>setPause(false);
 /* menu */
-function home(){if(cur&&cur.cat==='personalizado'&&(!up||up.src!==cur.src))URL.revokeObjectURL(cur.src);game=false;won=false;stop();el0=0;P.forEach(p=>p.el.remove());P=[];$('game').hidden=true;$('home').hidden=false}
+function home(){relG();game=false;won=false;stop();el0=0;P.forEach(p=>p.el.remove());P=[];$('game').hidden=true;$('home').hidden=false}
 $('mn').onclick=()=>{if(game&&!won&&!confirm('Descartar a partida em andamento?'))return;home()};
 $('ms').onclick=()=>{rs();modal('sd')};$('mh').onclick=()=>modal('hd');$('mc').onclick=()=>modal('cd');
 
@@ -145,18 +146,8 @@ const FILES=[
   src:'public/images/puzzles/a-arca-de-noe.png'
  },
  {
-  id:'davi-e-golias',
-  name:'Davi e Golias',
-  src:'public/images/puzzles/davi-e-golias.png'
- },
- {
-  id:'daniel-na-cova-dos-leoes',
-  name:'Daniel na Cova dos Leões',
-  src:'public/images/puzzles/daniel-na-cova-dos-leoes.png'
- },
- {
   id:'criancas-brincando-no-parque',
-  name:'Crianças Brincando no Parque',
+  name:'Crianças Brincando',
   src:'public/images/puzzles/criancas-brincando-no-parque.png'
  }
 ];
@@ -193,45 +184,106 @@ render();
 
 /* envio de foto (processamento local) */
 const er=m=>$('er').textContent=m,st=m=>$('st').textContent=m;addEventListener('error',e=>er('Erro no script: '+e.message));
-async function hash(f){try{const b=await crypto.subtle.digest('SHA-256',await f.arrayBuffer());return'u-'+[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{return`u-${f.name}-${f.size}-${f.lastModified}`}}
-function free(){if(up&&!(game&&cur&&cur.src===up.src))URL.revokeObjectURL(up.src);up=null;$('pv').hidden=true}
+/* ===== URLs temporárias: gerenciador central. Donos: 'up' = seleção/pré-visualização, 'game' = partida em curso.
+   Uma URL só é revogada quando o último dono a libera. ===== */
+const URLs=(()=>{const m=new Map();return{make(b,o){const u=URL.createObjectURL(b);m.set(u,new Set([o]));return u},hold(u,o){const s=m.get(u);s&&s.add(o)},
+ drop(u,o){const s=m.get(u);if(!s)return;s.delete(o);if(!s.size){URL.revokeObjectURL(u);m.delete(u)}},n:()=>m.size}})();
+self.__qc={urls:()=>URLs.n()};/* diagnóstico: console > __qc.urls() deve ser 0 ou 1 fora de partida */
+let gsrc=null;
+const holdG=()=>{if(gsrc&&gsrc!==cur.src)URLs.drop(gsrc,'game');gsrc=cur.src;URLs.hold(cur.src,'game')},
+ relG=()=>{if(gsrc)URLs.drop(gsrc,'game');gsrc=null;['th','wi','pdi','ci'].forEach(i=>$(i).removeAttribute('src'));$('ghost').style.backgroundImage=''};
+function free(){if(up)URLs.drop(up.src,'up');up=null;$('pvi').removeAttribute('src');$('pv').hidden=true}
+/* ===== limites adaptativos (maior lado E total de pixels, sempre respeitando a proporção) ===== */
+const MOB=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&matchMedia('(pointer:coarse)').matches)||navigator.deviceMemory<=2,
+ lim=()=>MOB?{s:2048,px:4e6}:{s:2560,px:2560*2560},
+ fitTo=(w,h)=>{const l=lim(),k=Math.min(1,l.s/Math.max(w,h),Math.sqrt(l.px/(w*h)));return{k,W:Math.max(1,Math.floor(w*k)),H:Math.max(1,Math.floor(h*k))}},
+ E=c=>Object.assign(Error(c),{code:c});
+const LITE=MOB&&(navigator.deviceMemory<=3||navigator.hardwareConcurrency<=4);document.documentElement.classList.toggle('lite',!!LITE);
+/* ===== SHA-256 do arquivo original (mesmo resultado de crypto.subtle) ===== */
 const rd=b=>b.arrayBuffer?b.arrayBuffer():new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error);r.readAsArrayBuffer(b)}),
- tmo=(p,ms)=>{let t;return Promise.race([p,new Promise((_,no)=>{t=setTimeout(()=>no(Error('timeout')),ms)})]).finally(()=>clearTimeout(t))},
- load=u=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u}),
- bmp=(f,o)=>createImageBitmap(f,{imageOrientation:'from-image',...o}).catch(()=>createImageBitmap(f,o)),
+ K=(()=>{const p=[];for(let n=2;p.length<64;n++)if(p.every(q=>n%q))p.push(n);return{k:p.map(q=>Math.cbrt(q)%1*4294967296>>>0),h:p.slice(0,8).map(q=>Math.sqrt(q)%1*4294967296>>>0)}})();
+/* em blocos de 1 MiB: nunca existe uma cópia inteira do arquivo em memória */
+async function sha(f,sig){const h=Uint32Array.from(K.h),w=new Uint32Array(64),k=K.k,
+ blk=(b,o)=>{for(let i=0;i<16;i++)w[i]=b[o+4*i]<<24|b[o+4*i+1]<<16|b[o+4*i+2]<<8|b[o+4*i+3];
+  for(let i=16;i<64;i++){const a=w[i-15],c=w[i-2];w[i]=w[i-16]+((a>>>7|a<<25)^(a>>>18|a<<14)^a>>>3)+w[i-7]+((c>>>17|c<<15)^(c>>>19|c<<13)^c>>>10)}
+  let a=h[0],b2=h[1],c2=h[2],d=h[3],e=h[4],g2=h[5],g=h[6],hh=h[7];
+  for(let i=0;i<64;i++){const t1=(hh+((e>>>6|e<<26)^(e>>>11|e<<21)^(e>>>25|e<<7))+((e&g2)^(~e&g))+k[i]+w[i])|0,t2=(((a>>>2|a<<30)^(a>>>13|a<<19)^(a>>>22|a<<10))+((a&b2)^(a&c2)^(b2&c2)))|0;hh=g;g=g2;g2=e;e=(d+t1)|0;d=c2;c2=b2;b2=a;a=(t1+t2)|0}
+  h[0]+=a;h[1]+=b2;h[2]+=c2;h[3]+=d;h[4]+=e;h[5]+=g2;h[6]+=g;h[7]+=hh},full=f.size-f.size%64,C=1<<20;
+ for(let o=0;o<full;o+=C){if(sig&&sig.aborted)throw E('abort');const u=new Uint8Array(await rd(f.slice(o,Math.min(o+C,full))));for(let i=0;i<u.length;i+=64)blk(u,i)}
+ const r=new Uint8Array(await rd(f.slice(full))),t=new Uint8Array(r.length<56?64:128),dv=new DataView(t.buffer);t.set(r);t[r.length]=128;
+ dv.setUint32(t.length-8,Math.floor(f.size/536870912));dv.setUint32(t.length-4,(f.size<<3)>>>0);for(let i=0;i<t.length;i+=64)blk(t,i);
+ return[...h].map(x=>x.toString(16).padStart(8,'0')).join('')}
+/* mesmo formato de id do placar: 'u-'+SHA-256 hex; sem crypto.subtle (http) mantém o id antigo por nome/tamanho/data */
+async function hash(f,sig){if(!(self.crypto&&crypto.subtle))return`u-${f.name}-${f.size}-${f.lastModified}`;let hx;
+ if(f.size<=4e6){try{hx=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await rd(f)))].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(x){if(sig&&sig.aborted)throw x}}
+ return'u-'+(hx||await sha(f,sig))}
+/* ===== operações canceláveis ===== */
+const load=(u,sig)=>new Promise((ok,no)=>{if(sig.aborted)return no(E('abort'));const i=new Image(),ab=()=>{i.onload=i.onerror=null;i.removeAttribute('src');no(E('abort'))};
+  sig.addEventListener('abort',ab,{once:true});i.onload=()=>{sig.removeEventListener('abort',ab);ok(i)};i.onerror=()=>{sig.removeEventListener('abort',ab);no(E('decode'))};i.src=u}),
+ /* createImageBitmap não aceita cancelamento: ao abortar, rejeitamos já e fechamos o bitmap que chegar atrasado */
+ bmp=(f,o,sig)=>new Promise((ok,no)=>{if(sig.aborted)return no(E('abort'));let dead=0;const ab=()=>{dead=1;no(E('abort'))};sig.addEventListener('abort',ab,{once:true});
+  createImageBitmap(f,{imageOrientation:'from-image',...o}).catch(()=>createImageBitmap(f,o)).then(b=>{sig.removeEventListener('abort',ab);dead?b.close():ok(b)},x=>{sig.removeEventListener('abort',ab);no(x)})}),
+ blob=(c,sig)=>new Promise((ok,no)=>{if(sig.aborted)return no(E('abort'));const ab=()=>no(E('abort'));sig.addEventListener('abort',ab,{once:true});
+  c.toBlob(b=>{sig.removeEventListener('abort',ab);b?ok(b):no(E('oom'))},'image/jpeg',.9)}),
+ rel=s=>{if(!s)return;if(s.close)s.close();else{s.onload=s.onerror=null;s.removeAttribute('src')}},
  NUBE='Não foi possível ler o arquivo no aparelho. Se a foto estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o celular e tente novamente.',
- HEIC='Esta foto está em HEIC/HEIF, formato que este navegador não abre. No iPhone use Ajustes > Câmera > Formatos > Mais compatível; no Android, compartilhe ou exporte como JPG.';
+ M={size:`A imagem tem mais de ${CFG.maxMB} MB.`,fmt:'Formato não aceito. Use JPG, PNG, WEBP ou AVIF.',cloud:NUBE,
+  heic:'Esta foto está em HEIC/HEIF, formato que este navegador não abre. No iPhone use Ajustes > Câmera > Formatos > Mais compatível; no Android, compartilhe ou exporte como JPG.',
+  small:`Imagem pequena demais (mínimo de ${CFG.minPx}px no lado menor).`,
+  timeout:'Tempo excedido ao processar a foto (30 s). Tente uma foto menor ou feche outros aplicativos.',
+  oom:'O aparelho ficou sem memória para processar esta foto. Feche outras abas ou aplicativos, ou envie uma versão com resolução menor.',
+  corrupt:'O arquivo parece corrompido ou incompleto. Copie-o novamente ou escolha outra foto.',
+  unk:'Não foi possível abrir este arquivo. Use uma foto JPG, PNG, WEBP ou AVIF válida.'};
 /* identifica o formato real pelos primeiros bytes (só para escolher a mensagem de erro) */
 async function kind(f){try{const b=new Uint8Array(await rd(f.slice(0,16))),s=(i,j)=>String.fromCharCode(...b.slice(i,j));
  if(b[0]===255&&b[1]===216)return'jpeg';if(s(1,4)==='PNG')return'png';if(s(0,4)==='RIFF'&&s(8,12)==='WEBP')return'webp';
  if(s(4,8)==='ftyp')return/^avi[fs]$/.test(s(8,12))?'avif':'heic';if(s(0,3)==='GIF')return'gif'}catch{}return'?'}
-/* plano B, só quando o navegador não abre a foto direto: decodifica já reduzida e gera uma cópia JPEG (o original não é alterado) */
-async function shrink(s,w,h){const k=Math.min(1,CFG.maxPx/Math.max(w,h)),W=Math.round(w*k),H=Math.round(h*k),c=document.createElement('canvas');c.width=W;c.height=H;
- const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(s,0,0,W,H);
- const b=await tmo(new Promise(r=>c.toBlob(r,'image/jpeg',.9)),CFG.tmo);c.width=c.height=0;if(!b)throw Error('toBlob');return{src:URL.createObjectURL(b),w:W,h:H}}
-async function viaBitmap(f){let bm;if(!self.createImageBitmap)throw Error('sem createImageBitmap');
- for(const o of f.size>3e6?[{resizeWidth:2048},{}]:[{},{resizeWidth:2048}]){try{bm=await tmo(bmp(f,o),CFG.tmo);break}catch{}}
- if(!bm)throw Error('bitmap');
- try{return await shrink(bm,bm.width,bm.height)}finally{bm.close&&bm.close()}}
-/* caminho normal: usa o arquivo original, sem reprocessar (leve para o celular) */
-async function decode(f){const u=URL.createObjectURL(f);
- try{const im=await tmo(load(u),CFG.tmo);if(im.naturalWidth&&im.naturalHeight)return{src:u,w:im.naturalWidth,h:im.naturalHeight}}catch{}
- URL.revokeObjectURL(u);return viaBitmap(f)}
-async function pick(f){er('');st('');if(!f)return;let keep=0;
+/* arquivo truncado? (JPEG sem EOI, PNG sem IEND) — só para escolher a mensagem de erro */
+async function trunc(f,k){try{const b=new Uint8Array(await rd(f.slice(-16)));if(k==='png')return String.fromCharCode(...b.slice(-8,-4))!=='IEND';
+ if(k==='jpeg'){let n=b.length;while(n>0&&!b[n-1])n--;return!(b[n-2]===255&&b[n-1]===217)}}catch{}return false}
+/* Decodificação. O original nunca é alterado.
+   1) mede as dimensões com <img> (em Chrome/Firefox o onload não força a decodificação completa);
+   2) se já cabe nos limites, usa o original sem converter;
+   3) senão createImageBitmap já pedindo o tamanho final (o navegador PODE ainda decodificar em resolução cheia
+      internamente — não há garantia) e desenha num canvas do tamanho final -> JPEG 0,90 via toBlob;
+   4) sem createImageBitmap: fallback pelo <img> + canvas. Fundo branco preservado (transparência). */
+async function decode(f,op){const sig=op.sig,u=URLs.make(f,'up'),HB=!!self.createImageBitmap;let s,dm,keep;
  try{
-  if(f.size>CFG.maxMB*1048576)return er(`A imagem tem mais de ${CFG.maxMB} MB.`);
-  if(/^image\/(gif|bmp|svg|tiff|x-icon)/.test(f.type)||f.type&&!/^image\//.test(f.type))return er('Formato não aceito. Use JPG, PNG, WEBP ou AVIF.');
-  st('Lendo a foto…');const k=await kind(f);
-  if(k==='gif')return er('Formato não aceito. Use JPG, PNG, WEBP ou AVIF.');
-  let r;try{r=await decode(f)}catch{return er(!f.size?NUBE:k==='heic'?HEIC:k==='?'?'Não foi possível abrir este arquivo. Use uma foto JPG, PNG, WEBP ou AVIF válida.':`Não foi possível abrir esta imagem (${k}, ${(f.size/1048576).toFixed(1)} MB). Se ela estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o aparelho; se for muito grande, reduza a resolução e envie de novo.`)}
-  if(Math.min(r.w,r.h)<CFG.minPx){URL.revokeObjectURL(r.src);return er(`Imagem pequena demais (mínimo de ${CFG.minPx}px no lado menor).`)}
-  free();const o=up={src:r.src,name:f.name};keep=1;
-  o.idp=hash(f).then(id=>{o.id=id;$('file').value=''});
-  $('pvi').src=r.src;$('pvn').textContent=f.name;$('pv').hidden=false
- }catch(x){er(NUBE+' ('+(x&&x.name||'erro')+')')}finally{st('');if(!keep)$('file').value=''}}
-$('pick').onclick=()=>$('file').click();$('file').onchange=e=>pick(e.target.files[0]);$('pvr').onclick=()=>{free();$('file').value=''};
-$('pvg').onclick=()=>{const o=up;if(!o)return;st('Preparando…');o.idp.then(()=>{st('');if(up===o)openCfg({id:o.id,name:o.name,src:o.src,cat:'personalizado'})})};
-const dz=$('drop');dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov')};dz.ondragleave=()=>dz.classList.remove('ov');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov');pick(e.dataTransfer.files[0])};
+  try{s=await load(u,sig);dm=[s.naturalWidth,s.naturalHeight]}catch(x){if(sig.aborted)throw x}
+  if(dm&&dm[0]&&dm[1]&&fitTo(dm[0],dm[1]).k>=1){rel(s);s=null;keep=u;return{src:u,w:dm[0],h:dm[1]}}
+  if(HB){rel(s);s=null;const t=dm&&dm[0]&&dm[1]?fitTo(dm[0],dm[1]):null;
+   for(const o of t?[{resizeWidth:t.W,resizeHeight:t.H,resizeQuality:'high'},{}]:[{resizeWidth:lim().s,resizeQuality:'high'},{}]){try{s=await bmp(f,o,sig);break}catch(x){if(sig.aborted)throw x}}}
+  if(!s)throw E('decode');
+  const w=s.naturalWidth||s.width,h=s.naturalHeight||s.height,t=fitTo(w,h),c=document.createElement('canvas');let b;
+  try{c.width=t.W;c.height=t.H;const x=c.getContext('2d');if(!x)throw E('oom');x.fillStyle='#fff';x.fillRect(0,0,t.W,t.H);x.imageSmoothingQuality='high';x.drawImage(s,0,0,t.W,t.H);rel(s);s=null;b=await blob(c,sig)}
+  finally{rel(s);s=null;c.width=c.height=0}
+  keep=URLs.make(b,'up');return{src:keep,w:t.W,h:t.H}}
+ finally{rel(s);if(keep!==u)URLs.drop(u,'up')}}
+/* um único processamento por vez; resultados de operações invalidadas são descartados */
+let busy=0,OP;const dz=$('drop'),setBusy=v=>{busy=v;['pick','pvg','pvr'].forEach(i=>$(i).disabled=!!v);dz.setAttribute('aria-busy',!!v)};
+async function pick(f){if(!f)return;if(busy)return er('Aguarde: a foto anterior ainda está sendo processada.');er('');st('');
+ const op=OP={ac:new AbortController(),to:0};op.sig=op.ac.signal;const tm=setTimeout(()=>{op.to=1;op.ac.abort()},CFG.tmo);setBusy(1);let k='?',r;
+ try{
+  if(f.size>CFG.maxMB*1048576)throw E('size');
+  if(/^image\/(gif|bmp|svg|tiff|x-icon)/.test(f.type)||f.type&&!/^image\//.test(f.type))throw E('fmt');
+  st('Lendo a foto…');k=await kind(f);if(k==='gif')throw E('fmt');if(!f.size)throw E('cloud');
+  const id=await hash(f,op.sig);/* hash antes da decodificação: nunca coexiste com os buffers da imagem */
+  st('Preparando a foto…');r=await decode(f,op);
+  if(op!==OP||op.sig.aborted)throw E('abort');
+  if(Math.min(r.w,r.h)<CFG.minPx)throw E('small');
+  free();up={src:r.src,name:f.name,id};r=null;$('pvi').src=up.src;$('pvn').textContent=f.name;$('pv').hidden=false
+ }catch(x){
+  if(r)URLs.drop(r.src,'up');let c=x&&x.code;if(c==='abort'&&!op.to)return;
+  if(op.to)c='timeout';else if(!c||c==='decode'){const n=x&&x.name;
+   if(n==='NotReadableError'||n==='NotFoundError')c='cloud';else if(n==='RangeError'||/memory|alloc/i.test(x&&x.message||''))c='oom';
+   else c=k==='heic'?'heic':k==='?'?'unk':await trunc(f,k)?'corrupt':'decode'}
+  er(M[c]||`Não foi possível decodificar esta imagem (${k}, ${(f.size/1048576).toFixed(1)} MB). Se ela estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o aparelho; se for muito grande, reduza a resolução e envie de novo.`)
+ }finally{clearTimeout(tm);if(OP===op)OP=null;setBusy(0);st('')}}
+/* o valor do input é limpo na hora (permite reescolher o mesmo arquivo, inclusive após erro); File continua válido */
+$('pick').onclick=()=>$('file').click();$('file').onchange=e=>{const f=e.target.files[0];e.target.value='';pick(f)};$('pvr').onclick=free;
+$('pvg').onclick=()=>{const o=up;if(o&&!busy)openCfg({id:o.id,name:o.name,src:o.src,cat:'personalizado'})};
+dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov')};dz.ondragleave=()=>dz.classList.remove('ov');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov');pick(e.dataTransfer.files[0])};
+addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>e.preventDefault());
 /* configuração */
 function grid(n,w,h){let best,bc=1e9;for(let c=1;c<=n;c++)for(let r=1;r<=n;r++){const m=c*r;if(m<n*.8||m>n*1.25)continue;const k=Math.abs(Math.log(w/c/(h/r)))*4+Math.abs(m-n)/n;if(k<bc){bc=k;best=[c,r]}}return best}
 const upd=()=>{const[c,r]=grid(+$('np').value,cur.w,cur.h);$('real').textContent=`Serão geradas ${c*r} peças (${c} × ${r}).`};
@@ -254,7 +306,7 @@ function pathOf(p){const{cw,ch,pad}=L,x=p.c*cw,y=p.r*ch,ox=x-pad,oy=y-pad,f=q=>(
  return d+'Z'}
 /* partida */
 function begin(){
- P.forEach(p=>p.el.remove());P=[];L=null;sel=drag=null;placed=0;Z=10;ki=0;won=false;paused=false;stage.classList.remove('ed','fin');
+ holdG();P.forEach(p=>p.el.remove());P=[];L=null;sel=drag=null;placed=0;Z=10;ki=0;won=false;paused=false;stage.classList.remove('ed','fin');
  IW=cur.w;IH=cur.h;[cols,rows]=grid(N0,IW,IH);N=cols*rows;
  const rnd=mul(Date.now()),J=()=>[0,0,0,0,0].map(()=>(rnd()-.5)*.08);
  EH=Array.from({length:rows+1},(_,r)=>Array.from({length:cols},()=>({s:r&&r<rows?(rnd()<.5?1:-1):0,j:J()})));
@@ -282,7 +334,7 @@ function layout(){
  const seen=new Set();
  for(const p of P){if(p.k||seen.has(p.g))continue;seen.add(p.g);if(!o)scat(p);fit(p.g)}
  P.forEach(place)}
-new ResizeObserver(layout).observe(stage);
+let lr=0;new ResizeObserver(()=>{lr||(lr=requestAnimationFrame(()=>{lr=0;layout()}))}).observe(stage);
 const place=p=>{p.el.style.transform=`translate(${p.x-p.w/2}px,${p.y-p.h/2}px) rotate(${p.rot}deg)`},
 front=g=>g.forEach(q=>q.el.style.zIndex=++Z),
 pop=o=>{o.el.classList.add('s');setTimeout(()=>o.el.classList.remove('s'),450)};
@@ -307,8 +359,8 @@ function randLoose(not){const u=P.filter(q=>!q.k&&q!==not&&(!stage.classList.con
 function setEntry(p){if(tabEntry&&tabEntry!==p)tabEntry.el.tabIndex=-1;tabEntry=p;if(p)p.el.tabIndex=0}
 stage.onpointerdown=e=>{const el=e.target.closest('.p');if(!el||!game||paused)return;const p=P[el.dataset.i];sel=p;el.focus({preventScroll:true});if(p.k)return;
  drag={g:p.g,p,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,mv:0};stage.setPointerCapture(e.pointerId);front(p.g);p.g.forEach(q=>q.el.classList.add('up'));e.preventDefault()};
-stage.onpointermove=e=>{if(!drag)return;if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>8)drag.mv=1;const dx=e.clientX-drag.x,dy=e.clientY-drag.y,g=drag.g;drag.x=e.clientX;drag.y=e.clientY;g.forEach(q=>{q.x+=dx;q.y+=dy});fit(g);g.forEach(place)};
-stage.onpointerup=stage.onpointercancel=e=>{if(!drag)return;const{g,p,mv}=drag,t=performance.now();drag=null;g.forEach(q=>q.el.classList.remove('up'));settle(g[0]);
+let dr=0;stage.onpointermove=e=>{if(!drag)return;if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>8)drag.mv=1;const dx=e.clientX-drag.x,dy=e.clientY-drag.y,g=drag.g;drag.x=e.clientX;drag.y=e.clientY;g.forEach(q=>{q.x+=dx;q.y+=dy});fit(g);dr||(dr=requestAnimationFrame(()=>{dr=0;if(drag)drag.g.forEach(place)}))};
+stage.onpointerup=stage.onpointercancel=e=>{if(!drag)return;const{g,p,mv}=drag,t=performance.now();drag=null;if(dr){cancelAnimationFrame(dr);dr=0}g.forEach(q=>{q.el.classList.remove('up');place(q)});settle(g[0]);
  /* duplo toque (celular) ou duplo clique: gira a peça no modo desafio */
  if(mv||e.type!=='pointerup')lastTap=null;
  else if(lastTap&&lastTap.p===p&&t-lastTap.t<350&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<30){lastTap=null;rot(p)}
@@ -351,12 +403,24 @@ function rs(){const a=ld().filter(x=>x.cat===sc),fm=$('fm'),fn=$('fn'),fi=$('fi'
 [['c1','modelo'],['c2','personalizado']].forEach(([i,v])=>$(i).onclick=()=>{sc=v;$('c1').setAttribute('aria-pressed',v==='modelo');$('c2').setAttribute('aria-pressed',v!=='modelo');rs()});
 ['fm','fn','fi'].forEach(i=>$(i).onchange=rs);
 $('sc').onclick=()=>{if(confirm('Apagar todos os recordes?')){ls(SK,'[]');rs()}};
+/* som de vitória (Web Audio, sem arquivos). Preferência em chave própria. */
+const AK='jigsaw.audio.v1';let AC,snd=ls(AK)!=='0',ub=0;
+const au=()=>{try{AC||=new(self.AudioContext||self.webkitAudioContext)();if(AC.state!=='running')AC.resume().catch(()=>{});
+  if(!ub&&AC.state!=='closed'){ub=1;const b=AC.createBufferSource();b.buffer=AC.createBuffer(1,1,22050);b.connect(AC.destination);b.start(0)}}catch{}},
+ sb=()=>{$('mu').setAttribute('aria-pressed',snd);$('mu').textContent=(snd?'🔊':'🔇')+' Som'};
+['pointerdown','keydown','touchend'].forEach(t=>addEventListener(t,au,{passive:true}));
+$('mu').onclick=()=>{snd=!snd;ls(AK,snd?'1':'0');sb();au()};sb();
+function fan(){if(!snd)return;try{au();if(!AC)return;const t=AC.currentTime+.05,m=AC.createGain();m.gain.value=.22;m.connect(AC.destination);
+ const n=(f,s,d,v,ty)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(0,t+s);g.gain.linearRampToValueAtTime(v,t+s+.02);g.gain.exponentialRampToValueAtTime(.001,t+s+d);o.connect(g);g.connect(m);o.start(t+s);o.stop(t+s+d+.05)};
+ [523.25,659.25,783.99,1046.5].forEach((f,i)=>{n(f,i*.13,.22,.5,'triangle');n(f*2,i*.13,.15,.06,'sine')});/* arpejo ascendente C-E-G-C */
+ [523.25,659.25,783.99,1046.5,1318.5].forEach(f=>n(f,.6,1.2,.22,'triangle'));n(2093,.6,.6,.04,'sine');/* acorde final de C maior */
+ setTimeout(()=>{try{m.disconnect()}catch{}},2300)}catch{}}
 /* vitória */
-function win(){won=true;stop();const ms=now(),r=save(ms);stage.classList.add('fin');
+function win(){if(won)return;won=true;stop();const ms=now(),r=save(ms);stage.classList.add('fin');
  $('wi').src=cur.src;$('wt').textContent=`Quebra-cabeça concluído em ${fmt(ms)}.`;$('wm').textContent=`${N} peças · ${chal?'Modo desafio':'Modo clássico'}${r?' · '+r:''}`;
- setTimeout(()=>{$('win').showModal();cf()},RM?0:800)}
+ setTimeout(()=>{try{$('win').showModal()}catch{}cf();fan()},RM?0:800)}
 function cf(){if(RM)return;const c=$('cf'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
- const ps=Array.from({length:150},()=>({x:Math.random()*c.width,y:-Math.random()*c.height*.6,vx:Math.random()*2-1,vy:2+Math.random()*4,s:6+Math.random()*6,h:Math.random()*360,r:Math.random()*6}));let f=0;
+ const ps=Array.from({length:LITE?70:150},()=>({x:Math.random()*c.width,y:-Math.random()*c.height*.6,vx:Math.random()*2-1,vy:2+Math.random()*4,s:6+Math.random()*6,h:Math.random()*360,r:Math.random()*6}));let f=0;
  (function a(){x.clearRect(0,0,c.width,c.height);for(const p of ps){p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=`hsl(${p.h} 85% 60%)`;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()}
   if(++f<400&&$('win').open)requestAnimationFrame(a);else x.clearRect(0,0,c.width,c.height)})()}
 $('wa').onclick=()=>{$('win').close();begin()};$('wo').onclick=()=>{$('win').close();home()};

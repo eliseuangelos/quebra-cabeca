@@ -11,6 +11,7 @@ Jogo de quebra-cabeças (jigsaw) em HTML, CSS e JavaScript puros, sem dependênc
 - Cronômetro com pausa, tela de vitória, tema claro/escuro e respeito a movimento reduzido.
 - Placar local (`localStorage`), separado em Modelos e Personalizados.
 - Envio de foto própria (JPG, PNG, WEBP ou AVIF, até 15 MB), processada no próprio navegador.
+- Efeito sonoro de vitória (Web Audio, sem arquivos), com botão **Som** no topo; a preferência fica em `jigsaw.audio.v1`.
 - Galeria com links de imagem cadastrados manualmente no `index.html`, sem catálogo JSON e sem consulta à API do GitHub.
 
 ## Estrutura
@@ -57,6 +58,15 @@ O arquivo precisa existir exatamente no caminho informado. Os arquivos guardados
 ## Sobre o carregamento das miniaturas
 
 As miniaturas usam `loading="lazy"` e `decoding="async"`, recursos nativos do navegador. Não há `IntersectionObserver` personalizado, leitura de `gallery.json` nem consulta à API do GitHub para descobrir as imagens. A imagem original continua sendo utilizada na montagem do quebra-cabeça.
+
+## Processamento de fotos (notas técnicas)
+
+- O original nunca é alterado. Se a foto já cabe nos limites, é usada como está; senão gera-se uma cópia JPEG (0,90, fundo branco) só para o jogo.
+- Limites: celular 2.048 px no maior lado e ~4 MP; computador 2.560 px. Os dois limites valem ao mesmo tempo e a proporção é preservada.
+- Ordem: validar → SHA-256 (em blocos de 1 MiB, mesmo id `u-<hex>` do placar) → decodificar. O hash nunca coexiste com a imagem decodificada.
+- Uma foto por vez; timeout de 30 s com cancelamento (`AbortController`). `createImageBitmap` não é cancelável: ao expirar, o bitmap atrasado é fechado e o resultado descartado.
+- URLs temporárias ficam num gerenciador central (donos `up` e `game`). No console, `__qc.urls()` deve ser 1 com uma foto selecionada e 0 sem nenhuma.
+- **Limites reais:** `createImageBitmap` com `resizeWidth/Height` pode decodificar em resolução cheia internamente, conforme o navegador; a orientação EXIF depende de o navegador aplicá-la em `<img>`/`createImageBitmap`; o fallback sem `createImageBitmap` decodifica a imagem inteira.
 
 ## Executar localmente
 
