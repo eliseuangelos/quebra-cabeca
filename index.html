@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Quebra-Cabeças</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2710%27%20fill%3D%27%23000%27%2F%3E%3Cg%20fill%3D%27%23fff%27%3E%3Crect%20x%3D%279%27%20y%3D%2723%27%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%271.5%27%2F%3E%3Crect%20x%3D%2721.5%27%20y%3D%2715%27%20width%3D%277%27%20height%3D%279%27%2F%3E%3Ccircle%20cx%3D%2725%27%20cy%3D%2715.5%27%20r%3D%276%27%2F%3E%3Crect%20x%3D%2740%27%20y%3D%2735.5%27%20width%3D%279%27%20height%3D%277%27%2F%3E%3Ccircle%20cx%3D%2748.5%27%20cy%3D%2739%27%20r%3D%276%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%23000%27%3E%3Ccircle%20cx%3D%2716.5%27%20cy%3D%2739%27%20r%3D%276%27%2F%3E%3Crect%20x%3D%278%27%20y%3D%2735.5%27%20width%3D%278.5%27%20height%3D%277%27%2F%3E%3Ccircle%20cx%3D%2725%27%20cy%3D%2747.5%27%20r%3D%276%27%2F%3E%3Crect%20x%3D%2721.5%27%20y%3D%2747.5%27%20width%3D%277%27%20height%3D%278.5%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
 <style>
 :root{--bg:#f2f4f1;--s:#fff;--t:#1a2321;--m:#62706c;--a:#0d7c72;--b:#d9dfdc;--sh:0 6px 18px #0002}
 [data-theme=dark]{--bg:#16181a;--s:#232629;--t:#e9eeec;--m:#98a5a1;--a:#5fd0c0;--b:#383d40;--sh:0 6px 18px #0008}
@@ -110,7 +111,7 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 
 <script>
 (()=>{
-const $=i=>document.getElementById(i),CFG={maxMB:15,tol:.3,minPx:200,counts:[12,24,48,72,100,150,200]},SK='jigsaw.scores.v1',
+const $=i=>document.getElementById(i),CFG={maxMB:15,tol:.3,minPx:200,maxPx:2560,counts:[12,24,48,72,100,150,200]},SK='jigsaw.scores.v1',
 ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k):localStorage.setItem(k,v)}catch{}},
 RM=matchMedia('(prefers-reduced-motion:reduce)').matches,
 esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';'),
@@ -167,17 +168,38 @@ loadGallery();
 const er=m=>$('er').textContent=m;addEventListener('error',e=>er('Erro no script: '+e.message));
 async function hash(f){try{const b=await crypto.subtle.digest('SHA-256',await f.arrayBuffer());return'u-'+[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{return`u-${f.name}-${f.size}-${f.lastModified}`}}
 function free(){if(up&&!(game&&cur&&cur.src===up.src))URL.revokeObjectURL(up.src);up=null;$('pv').hidden=true}
-const load=u=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u});
+const load=u=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u}),
+ bmp=(f,o)=>createImageBitmap(f,{imageOrientation:'from-image',...o}).catch(()=>createImageBitmap(f,o)),
+ NUBE='Não foi possível ler o arquivo no aparelho. Se a foto estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o celular e tente novamente.',
+ HEIC='Esta foto está em HEIC/HEIF, formato que este navegador não abre. No iPhone use Ajustes > Câmera > Formatos > Mais compatível; no Android, compartilhe ou exporte como JPG.';
+/* identifica o formato real pelos primeiros bytes (não confia só em tipo/extensão) */
+async function kind(f){const b=new Uint8Array(await f.slice(0,16).arrayBuffer()),s=(i,j)=>String.fromCharCode(...b.slice(i,j));
+ if(b[0]===255&&b[1]===216)return'jpeg';if(s(1,4)==='PNG')return'png';if(s(0,4)==='RIFF'&&s(8,12)==='WEBP')return'webp';
+ if(s(4,8)==='ftyp')return/^avi[fs]$/.test(s(8,12))?'avif':'heic';return'?'}
+/* cópia de trabalho reduzida (celulares falham/travam com fotos enormes); o arquivo original não é alterado */
+async function shrink(s,w,h){const k=Math.min(1,CFG.maxPx/Math.max(w,h)),W=Math.round(w*k),H=Math.round(h*k),c=document.createElement('canvas');c.width=W;c.height=H;
+ const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.drawImage(s,0,0,W,H);
+ const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.92));c.width=c.height=0;if(!b)throw Error('toBlob');return{src:URL.createObjectURL(b),w:W,h:H}}
+async function decode(f){const u=URL.createObjectURL(f);let im,bm;
+ try{im=await load(u)}catch{}
+ if(im&&im.naturalWidth&&im.naturalHeight){const w=im.naturalWidth,h=im.naturalHeight;
+  if(Math.max(w,h)<=CFG.maxPx)return{src:u,w,h};
+  try{const r=await shrink(im,w,h);URL.revokeObjectURL(u);return r}catch{}}
+ URL.revokeObjectURL(u);
+ if(self.createImageBitmap)for(const o of[{},{resizeWidth:2048}]){try{bm=await bmp(f,o);break}catch{}}
+ if(!bm)throw Error('decode');
+ try{return await shrink(bm,bm.width,bm.height)}finally{bm.close&&bm.close()}}
 async function pick(f){er('');if(!f)return;
  try{
-  if(!/^image\/(jpeg|png|webp|avif)$/.test(f.type)&&!/\.(jpe?g|png|webp|avif)$/i.test(f.name))return er('Formato não aceito. Use JPG, PNG, WEBP ou AVIF.');
+  if(!f.size)return er(NUBE);
   if(f.size>CFG.maxMB*1048576)return er(`A imagem tem mais de ${CFG.maxMB} MB.`);
-  const u=URL.createObjectURL(f);let im;
-  try{im=await load(u)}catch{URL.revokeObjectURL(u);return er('Não foi possível ler esta imagem: o arquivo pode estar inválido ou corrompido.')}
-  if(Math.min(im.naturalWidth,im.naturalHeight)<CFG.minPx){URL.revokeObjectURL(u);return er(`Imagem pequena demais (mínimo de ${CFG.minPx}px no lado menor).`)}
-  free();up={src:u,name:f.name,id:await hash(f)};$('pvi').src=u;$('pvn').textContent=f.name;$('pv').hidden=false
- }catch(x){er('Falha ao processar a imagem: '+(x&&x.message||x))}finally{$('file').value=''}}
-$('pick').onclick=()=>$('file').click();$('file').onchange=e=>pick(e.target.files[0]);$('pvr').onclick=free;
+  const k=await kind(f);
+  if(k==='?'&&!/^image\/(jpeg|png|webp|avif)$/.test(f.type))return er('Formato não aceito. Use JPG, PNG, WEBP ou AVIF.');
+  let r;try{r=await decode(f)}catch{return er(k==='heic'?HEIC:`Não foi possível abrir esta imagem (${k}, ${(f.size/1048576).toFixed(1)} MB). Se ela estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o aparelho; se for muito grande, reduza a resolução e envie de novo.`)}
+  if(Math.min(r.w,r.h)<CFG.minPx){URL.revokeObjectURL(r.src);return er(`Imagem pequena demais (mínimo de ${CFG.minPx}px no lado menor).`)}
+  free();up={src:r.src,name:f.name,id:await hash(f)};$('pvi').src=r.src;$('pvn').textContent=f.name;$('pv').hidden=false
+ }catch(x){er(NUBE+' ('+(x&&x.name||'erro')+')')}}
+$('pick').onclick=()=>$('file').click();$('file').onchange=e=>pick(e.target.files[0]);$('pvr').onclick=()=>{free();$('file').value=''};
 $('pvg').onclick=()=>up&&openCfg({id:up.id,name:up.name,src:up.src,cat:'personalizado'});
 const dz=$('drop');dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov')};dz.ondragleave=()=>dz.classList.remove('ov');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov');pick(e.dataTransfer.files[0])};
 

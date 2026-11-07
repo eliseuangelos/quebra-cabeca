@@ -9,7 +9,7 @@ Jogo de quebra-cabeças (jigsaw) em HTML, CSS e JavaScript puros, sem dependênc
 - Modo fantasma (imagem translúcida de 20% a 40% alinhada ao tabuleiro), imagem de referência ampliável, bordas, dica, organizar e ajustar tabuleiro.
 - Cronômetro com pausa, tela de vitória com confetes, tema claro/escuro e respeito a movimento reduzido.
 - Placar local (`localStorage`), separado em Modelos e Personalizados, com top 10 por imagem, quantidade de peças e modo.
-- Envio de foto própria (JPG, PNG, WEBP, AVIF, até 15 MB), processada só no navegador; o placar usa o SHA-256 do arquivo como identificador.
+- Envio de foto própria (JPG, PNG, WEBP, AVIF, até 15 MB), processada só no navegador e reduzida a no máximo 2560 px no lado maior (o arquivo original não é alterado); o placar usa o SHA-256 do arquivo como identificador.
 
 ## Estrutura
 ```
@@ -39,7 +39,7 @@ Envie o projeto ao repositório, abra Settings > Pages e escolha a branch e a pa
 - **Distribuição:** as peças são espalhadas fora do tabuleiro, sempre dentro da área visível, e reposicionadas se a tela mudar de tamanho.
 
 ## Limitações conhecidas
-Sem salvamento automático de partidas em andamento, sem bandejas de peças com rolagem e sem miniaturas redimensionadas (o navegador reduz as imagens originais).
+Sem salvamento automático de partidas em andamento, sem bandejas de peças com rolagem e sem miniaturas redimensionadas (o navegador reduz as imagens originais). Fotos HEIC/HEIF só abrem em navegadores que as suportam; no Android, exporte como JPG.
 
 ## Créditos
 Desenvolvimento: Eliseu Fernandes Laurindo — https://eliseuangelos.github.io
