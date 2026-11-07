@@ -4,8 +4,8 @@ Jogo de quebra-cabeças (jigsaw) em HTML, CSS e JavaScript puros, sem dependênc
 
 ## Funcionalidades
 - Peças reais com encaixes (curvas de Bézier compartilhadas entre vizinhas), desenhadas com `clip-path: path()`.
-- Arrastar com mouse, toque ou caneta (Pointer Events); encaixe automático com tolerância configurável (`CFG.tol`); peças vizinhas formam grupos.
-- Modo clássico e modo desafio (rotação de 90°: tecla `R` ou botão Girar; só encaixa na orientação correta). Desafio vem desligado.
+- Arrastar com mouse, toque ou caneta (Pointer Events); encaixe automático com tolerância configurável (`CFG.tol`); peças vizinhas formam grupos. No teclado, Tab leva a uma peça solta aleatória (Shift+Tab volta aos botões) e as setas movem a peça.
+- Modo clássico e modo desafio (rotação de 90°: tecla `R`, botão Girar ou duplo toque/clique na peça; só encaixa na orientação correta). Desafio vem desligado.
 - Modo fantasma (imagem translúcida de 20% a 40% alinhada ao tabuleiro), imagem de referência ampliável, bordas, dica, organizar e ajustar tabuleiro.
 - Cronômetro com pausa, tela de vitória com confetes, tema claro/escuro e respeito a movimento reduzido.
 - Placar local (`localStorage`), separado em Modelos e Personalizados, com top 10 por imagem, quantidade de peças e modo.

@@ -94,9 +94,9 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <dialog id="hd"><h2>Explicação</h2><ul>
 <li>Escolha uma foto da galeria ou envie a sua, defina o número de peças e inicie o jogo.
 <li>Arraste as peças com o mouse ou o dedo. Perto da posição correta, elas encaixam sozinhas. Peças vizinhas se unem e se movem juntas.
-<li>Modo desafio: as peças começam giradas. Selecione uma e use <kbd>R</kbd> ou o botão Girar (90° por vez). Só encaixa na orientação certa.
+<li>Modo desafio: as peças começam giradas. Selecione uma e use <kbd>R</kbd>, o botão Girar ou dê dois toques (ou duplo clique) sobre a peça. Gira 90° por vez e só encaixa na orientação certa.
 <li>Fantasma mostra a imagem translúcida sobre o tabuleiro. Dica destaca onde a peça selecionada vai. Bordas mostra só as peças externas. Organizar espalha as peças soltas. Ajustar muda o tamanho do tabuleiro.
-<li>Teclado: Tab seleciona uma peça, as setas movem (Shift para passos maiores).</ul>
+<li>Teclado: Tab vai para uma peça solta aleatória (Shift+Tab volta aos botões) e as setas movem a peça (Shift para passos maiores).</ul>
 <menu><button data-x class="pri">Fechar</button></menu></dialog>
 
 <dialog id="cd"><h2>Créditos</h2><p>Desenvolvimento: Eliseu Fernandes Laurindo</p>
@@ -119,7 +119,7 @@ p2=n=>String(n).padStart(2,'0'),fmt=ms=>{const s=Math.floor(ms/1e3);return p2(s/
 ld=()=>{try{return JSON.parse(ls(SK)||'[]')}catch{return[]}},
 mul=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296},
 stage=$('stage'),KS=[1,.8,.65],D=[[1,0],[-1,0],[0,1],[0,-1]];
-let items=[],cur,up,P=[],EH,EV,N,N0=48,cols,rows,IW,IH,L,SW,SH,game,paused,won,chal,sel,drag,Z,placed,ki,ghostOn,el0=0,t0=0,ht,sc='modelo';
+let items=[],cur,up,P=[],EH,EV,N,N0=48,cols,rows,IW,IH,L,SW,SH,game,paused,won,chal,sel,drag,Z,placed,ki,ghostOn,el0=0,t0=0,ht,sc='modelo',tabEntry,lastTap;
 
 /* tema e diálogos */
 const setTh=t=>{document.documentElement.dataset.theme=t;ls('theme',t)};
@@ -212,9 +212,10 @@ function begin(){
  EV=Array.from({length:rows},()=>Array.from({length:cols+1},(_,c)=>({s:c&&c<cols?(rnd()<.5?1:-1):0,j:J()})));
  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
   const el=document.createElement('div'),p={r,c,el,rot:chal?90*(rnd()*4|0):0,k:0,x:0,y:0};
-  p.g=[p];el.className='p'+(r&&r<rows-1&&c&&c<cols-1?'':' e');el.tabIndex=0;el.dataset.i=P.length;
+  p.g=[p];el.className='p'+(r&&r<rows-1&&c&&c<cols-1?'':' e');el.tabIndex=-1;el.dataset.i=P.length;
   el.setAttribute('aria-label',`Peça linha ${r+1}, coluna ${c+1}`);el.innerHTML='<div class="i"></div>';el.firstChild.style.backgroundImage=`url("${cur.src}")`;
   stage.append(el);P.push(p)}
+ tabEntry=null;setEntry(randLoose());
  $('th').src=cur.src;$('thb').hidden=!$('rf').checked;$('bi').setAttribute('aria-pressed',$('rf').checked);
  setGhost($('gh').checked);$('ghost').style.opacity=$('gr').value/100;$('bt').hidden=!chal;$('be').setAttribute('aria-pressed',false);$('pause').hidden=true;$('bp').textContent='Pausar';
  $('home').hidden=true;$('game').hidden=false;game=true;el0=0;t0=0;run();layout()}
@@ -245,7 +246,7 @@ function fit(g){let a=1e9,b=1e9,c=-1e9,d=-1e9;for(const p of g){const h=Math.max
  const dx=a<0?-a:c>SW?SW-c:0,dy=b<0?-b:d>SH?SH-d:0;for(const p of g){p.x+=dx;p.y+=dy}}
 
 /* encaixe e agrupamento */
-function lock(o){if(o.k)return;o.k=1;placed++;o.x=L.bx+(o.c+.5)*L.cw;o.y=L.by+(o.r+.5)*L.ch;place(o);o.el.classList.add('k');o.el.style.zIndex=1;o.el.tabIndex=-1;pop(o)}
+function lock(o){if(o.k)return;o.k=1;placed++;o.x=L.bx+(o.c+.5)*L.cw;o.y=L.by+(o.r+.5)*L.ch;place(o);o.el.classList.add('k');o.el.style.zIndex=1;o.el.tabIndex=-1;if(tabEntry===o)tabEntry=null;pop(o)}
 const fin=()=>{if(placed===N&&!won)win()};
 function settle(p){
  const g=p.g;if(!game||g.some(q=>q.rot%360))return;const tol=CFG.tol*Math.min(L.cw,L.ch);
@@ -256,12 +257,23 @@ function settle(p){
 function rot(p){if(!chal||!p||p.k||paused||won||p.g.length>1)return;p.rot+=90;place(p);settle(p)}
 
 /* ponteiro (mouse, toque e caneta) */
+/* Tab: só uma peça fica "tabulável" (sorteada entre as soltas), então a ordem do desenho não aparece */
+function randLoose(not){const u=P.filter(q=>!q.k&&q!==not&&(!stage.classList.contains('ed')||q.el.classList.contains('e')));return u.length?u[Math.random()*u.length|0]:(not&&!not.k?not:null)}
+function setEntry(p){if(tabEntry&&tabEntry!==p)tabEntry.el.tabIndex=-1;tabEntry=p;if(p)p.el.tabIndex=0}
 stage.onpointerdown=e=>{const el=e.target.closest('.p');if(!el||!game||paused)return;const p=P[el.dataset.i];sel=p;el.focus({preventScroll:true});if(p.k)return;
- drag={g:p.g,x:e.clientX,y:e.clientY};stage.setPointerCapture(e.pointerId);front(p.g);p.g.forEach(q=>q.el.classList.add('up'));e.preventDefault()};
-stage.onpointermove=e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=e.clientY-drag.y,g=drag.g;drag.x=e.clientX;drag.y=e.clientY;g.forEach(q=>{q.x+=dx;q.y+=dy});fit(g);g.forEach(place)};
-stage.onpointerup=stage.onpointercancel=()=>{if(!drag)return;const g=drag.g;drag=null;g.forEach(q=>q.el.classList.remove('up'));settle(g[0])};
+ drag={g:p.g,p,x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY,mv:0};stage.setPointerCapture(e.pointerId);front(p.g);p.g.forEach(q=>q.el.classList.add('up'));e.preventDefault()};
+stage.onpointermove=e=>{if(!drag)return;if(Math.hypot(e.clientX-drag.sx,e.clientY-drag.sy)>8)drag.mv=1;const dx=e.clientX-drag.x,dy=e.clientY-drag.y,g=drag.g;drag.x=e.clientX;drag.y=e.clientY;g.forEach(q=>{q.x+=dx;q.y+=dy});fit(g);g.forEach(place)};
+stage.onpointerup=stage.onpointercancel=e=>{if(!drag)return;const{g,p,mv}=drag,t=performance.now();drag=null;g.forEach(q=>q.el.classList.remove('up'));settle(g[0]);
+ /* duplo toque (celular) ou duplo clique: gira a peça no modo desafio */
+ if(mv||e.type!=='pointerup')lastTap=null;
+ else if(lastTap&&lastTap.p===p&&t-lastTap.t<350&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<30){lastTap=null;rot(p)}
+ else lastTap={p,t,x:e.clientX,y:e.clientY}};
 stage.oncontextmenu=e=>e.preventDefault();
-stage.addEventListener('focusin',e=>{const el=e.target.closest&&e.target.closest('.p');if(el)sel=P[el.dataset.i]});
+stage.addEventListener('focusin',e=>{const el=e.target.closest&&e.target.closest('.p');if(el){sel=P[el.dataset.i];if(!sel.k)setEntry(sel)}});
+document.addEventListener('focusin',e=>{if(game&&!won&&!(e.target.closest&&e.target.closest('.p')))setEntry(randLoose())});
+stage.addEventListener('keydown',e=>{const el=e.target.closest&&e.target.closest('.p');
+ if(e.key!=='Tab'||e.shiftKey||e.altKey||e.ctrlKey||e.metaKey||!el||!game||paused||won)return;
+ const n=randLoose(P[el.dataset.i]);if(!n)return;e.preventDefault();setEntry(n);n.el.focus({preventScroll:true})});
 document.onkeydown=e=>{if(!game||paused||won||!sel||sel.k||e.target.closest('input,select')||document.querySelector('dialog[open]'))return;
  if(e.key==='r'||e.key==='R')return rot(sel);
  const m={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!m)return;e.preventDefault();
@@ -273,7 +285,7 @@ $('bg').onclick=()=>setGhost(!ghostOn);$('gr').oninput=e=>$('ghost').style.opaci
 $('br').onclick=()=>{if(game&&!won&&confirm('Reiniciar esta partida?'))begin()};
 $('bi').onclick=()=>{const h=$('thb').hidden=!$('thb').hidden;$('bi').setAttribute('aria-pressed',!h)};
 $('thb').onclick=()=>{$('pdi').src=cur.src;$('pd').showModal()};
-$('be').onclick=()=>$('be').setAttribute('aria-pressed',stage.classList.toggle('ed'));
+$('be').onclick=()=>{$('be').setAttribute('aria-pressed',stage.classList.toggle('ed'));setEntry(randLoose())};
 $('bt').onclick=()=>rot(sel);
 $('bf').onclick=()=>{if(game){ki=(ki+1)%KS.length;layout()}};
 $('bh').onclick=()=>{if(!game||paused||won)return;let p=sel&&!sel.k?sel:null;if(!p){const u=P.filter(q=>!q.k);p=u[Math.random()*u.length|0]}
