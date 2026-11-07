@@ -54,6 +54,34 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 @keyframes gr{from{transform:scale(.3);opacity:0}}@keyframes gl{from{box-shadow:0 0 20px #5fd0c055}to{box-shadow:0 0 60px #5fd0c0cc}}
 #cf{position:fixed;inset:0;pointer-events:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* Controles consistentes nos dois temas */
+:root{color-scheme:light}
+[data-theme=dark]{color-scheme:dark}
+select,input:not([type="file"]):not([type="checkbox"]):not([type="range"]){
+  min-height:38px;max-width:100%;padding:8px 11px;
+  color:var(--t);background:var(--s);border:1px solid var(--b);
+  border-radius:9px;accent-color:var(--a)
+}
+select{cursor:pointer}
+select option{color:var(--t);background:var(--s)}
+input::placeholder{color:var(--m);opacity:1}
+#sd{padding:20px;max-height:min(90dvh,760px);overflow:auto}
+#sd>div{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 12px}
+#sd>p{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:12px 0}
+#sd>p select{width:100%;min-width:0}
+#sl{display:grid;gap:12px}
+#sl h3{margin:8px 0 0;padding:0 0 7px;border-bottom:1px solid var(--b);font-size:14px;line-height:1.4}
+#sl ol{list-style:none;margin:0;padding:0;display:grid;gap:5px}
+#sl li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 11px;background:var(--bg);border:1px solid var(--b);border-radius:9px;font-variant-numeric:tabular-nums}
+#sl li .m{flex:none;font-size:12px}
+#sd menu{position:sticky;bottom:-20px;margin:14px 0 -20px;padding:12px 0 20px;background:var(--s);border-top:1px solid var(--b)}
+#q{color:var(--t)}
+@media(max-width:560px){
+ #sd{padding:16px}
+ #sd>p{grid-template-columns:1fr}
+ #sl li{padding:8px 9px}
+}
 </style>
 </head>
 <body>
@@ -135,29 +163,67 @@ function home(){if(cur&&cur.cat==='personalizado'&&(!up||up.src!==cur.src))URL.r
 $('mn').onclick=()=>{if(game&&!won&&!confirm('Descartar a partida em andamento?'))return;home()};
 $('ms').onclick=()=>{rs();modal('sd')};$('mh').onclick=()=>modal('hd');$('mc').onclick=()=>modal('cd');
 
-/* galeria (lê somente public/data/gallery.json) */
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.src=e.target.dataset.src;io.unobserve(e.target)}}),{rootMargin:'250px'});
+/* Galeria: catálogo gerado + fallback embutido para a Arca de Noé */
+const FALLBACK_GALLERY=[{
+ id:'arca-de-noe',name:'A Arca de Noé',filename:'A Arca de Noé.png',
+ src:'public/images/puzzles/A%20Arca%20de%20No%C3%A9.png',
+ width:1280,height:955,orientation:'landscape',featured:true,order:0
+}];
+const io=('IntersectionObserver' in window)
+ ? new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.src=e.target.dataset.src;io.unobserve(e.target)}}),{rootMargin:'250px'})
+ : null;
 function render(){const q=norm($('q').value);
  $('gal').replaceChildren(...items.filter(i=>norm(i.name).includes(q)).map(i=>{
-  const b=document.createElement('button'),n=document.createElement('span');b.className='card';b.innerHTML='<span class="ph"><img alt="" loading="lazy" decoding="async"></span>';n.textContent=i.name;b.append(n);
-  const im=b.querySelector('img');im.dataset.src=i.src;im.onload=()=>b.classList.add('ok');im.onerror=()=>b.classList.add('bad');io.observe(im);
-  b.onclick=()=>{document.querySelectorAll('.card.on').forEach(c=>c.classList.remove('on'));b.classList.add('on');openCfg({id:i.id,name:i.name,src:i.src,cat:'modelo'})};return b}));
- $('gm').textContent=items.length?'':'Catálogo vazio. Adicione imagens em public/images/puzzles/ (incluindo "A Arca de Noé.png") e rode: node scripts/generate-gallery.mjs'}
+  const b=document.createElement('button'),n=document.createElement('span');b.className='card';
+  b.innerHTML='<span class="ph"><img alt="" loading="lazy" decoding="async"></span>';n.textContent=i.name;b.append(n);
+  const im=b.querySelector('img');im.dataset.src=i.src;
+  im.onload=()=>b.classList.add('ok');im.onerror=()=>{b.classList.add('bad');im.removeAttribute('src')};
+  if(io)io.observe(im);else im.src=im.dataset.src;
+  b.onclick=()=>{document.querySelectorAll('.card.on').forEach(c=>c.classList.remove('on'));b.classList.add('on');openCfg({id:i.id,name:i.name,src:i.src,cat:'modelo'})};
+  return b
+ }));
+ $('gm').textContent=items.length?'':'Nenhuma imagem disponível. Verifique os arquivos em public/images/puzzles/.';
+}
 $('q').oninput=render;
-fetch('public/data/gallery.json').then(r=>r.ok?r.json():Promise.reject()).then(j=>{items=j;render()}).catch(()=>$('gm').textContent='Não foi possível carregar public/data/gallery.json. Abra o site por um servidor (não por file://) e gere o catálogo.');
+async function loadGallery(){
+ const catalogUrl=new URL('public/data/gallery.json',document.baseURI);
+ catalogUrl.searchParams.set('v','2');
+ try{
+  const response=await fetch(catalogUrl,{cache:'no-store'});
+  if(!response.ok)throw new Error(`HTTP ${response.status}`);
+  const data=await response.json();
+  if(!Array.isArray(data))throw new Error('Formato de catálogo inválido');
+  items=data.filter(x=>x&&typeof x.name==='string'&&typeof x.src==='string'&&typeof x.id==='string');
+ }catch(err){
+  console.warn('Catálogo JSON indisponível; usando galeria alternativa.',err);
+  items=[];
+ }
+ if(!items.length)items=FALLBACK_GALLERY.slice();
+ // A Arca de Noé sempre aparece primeiro, mesmo se o JSON vier em outra ordem.
+ items.sort((a,b)=>(Number(!!b.featured)-Number(!!a.featured))||((a.order??9999)-(b.order??9999)));
+ render();
+}
+loadGallery();
 
 /* envio de foto (processamento local) */
 const er=m=>$('er').textContent=m;
-async function hash(f){try{const b=await crypto.subtle.digest('SHA-256',await f.arrayBuffer());return'u-'+[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{return`u-${f.name}-${f.size}-${f.lastModified}`}}
-function free(){if(up&&!(game&&cur&&cur.src===up.src))URL.revokeObjectURL(up.src);up=null;$('pv').hidden=true;$('file').value=''}
-function pick(f){er('');if(!f)return;free();
- if(!/^image\/(jpeg|png|webp|avif)$/.test(f.type)&&!/\.(jpe?g|png|webp|avif)$/i.test(f.name))return er('Formato não aceito. Use JPG, PNG, WEBP ou AVIF.');
- if(f.size>CFG.maxMB*1048576)return er(`A imagem tem mais de ${CFG.maxMB} MB.`);
+async function hash(f){try{if(!crypto?.subtle?.digest)throw new Error('SHA-256 indisponível');const b=await crypto.subtle.digest('SHA-256',await f.arrayBuffer());return'u-'+[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch{return`u-${norm(f.name).replace(/[^a-z0-9]+/g,'-')}-${f.size}-${f.lastModified}`}}
+function free(){if(up&&!(game&&cur&&cur.src===up.src))URL.revokeObjectURL(up.src);up=null;$('pv').hidden=true;$('pvi').removeAttribute('src');$('pvn').textContent='';$('file').value=''}
+function pick(f){
+ er('');if(!f)return;free();
+ const allowed=/\.(jpe?g|png|webp|avif)$/i.test(f.name)||/^image\/(jpeg|png|webp|avif|jpg)$/i.test(f.type);
+ if(!allowed)return er('Formato não aceito. Selecione uma imagem JPG, PNG, WEBP ou AVIF.');
+ if(f.size>CFG.maxMB*1048576)return er(`A imagem ultrapassa o limite de ${CFG.maxMB} MB.`);
+ if(!f.size)return er('O arquivo selecionado está vazio.');
  const u=URL.createObjectURL(f),im=new Image();
- im.onerror=()=>{URL.revokeObjectURL(u);er('Não foi possível ler esta imagem: o arquivo pode estar inválido ou corrompido.')};
- im.onload=async()=>{if(Math.min(im.naturalWidth,im.naturalHeight)<CFG.minPx){URL.revokeObjectURL(u);return er(`Imagem pequena demais (mínimo de ${CFG.minPx}px no lado menor).`)}
-  up={src:u,name:f.name,id:await hash(f)};$('pvi').src=u;$('pvn').textContent=f.name;$('pv').hidden=false};
- im.src=u}
+ im.onerror=()=>{URL.revokeObjectURL(u);er('Não foi possível abrir a imagem. Tente salvar uma cópia em JPG ou PNG e selecionar novamente.')};
+ im.onload=async()=>{
+  if(Math.min(im.naturalWidth,im.naturalHeight)<CFG.minPx){URL.revokeObjectURL(u);return er(`Imagem pequena demais. O menor lado precisa ter pelo menos ${CFG.minPx}px.`)}
+  up={src:u,name:f.name,id:await hash(f)};
+  $('pvi').src=u;$('pvn').textContent=f.name;$('pv').hidden=false;
+ };
+ im.src=u;
+}
 $('pick').onclick=()=>$('file').click();$('file').onchange=e=>pick(e.target.files[0]);$('pvr').onclick=free;
 $('pvg').onclick=()=>up&&openCfg({id:up.id,name:up.name,src:up.src,cat:'personalizado'});
 const dz=$('drop');dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov')};dz.ondragleave=()=>dz.classList.remove('ov');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov');pick(e.dataTransfer.files[0])};
