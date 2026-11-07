@@ -27,9 +27,6 @@ button[aria-pressed=true],.pri{background:var(--a);color:#fff;border-color:var(-
 kbd{border:1px solid var(--b);border-radius:4px;padding:0 4px}
 #home{flex:1;overflow:auto;padding:16px}.w{max-width:1100px;margin:auto}
 .v{animation:in .35s}@keyframes in{from{opacity:0;transform:translateY(8px)}}
-#drop{border:2px dashed var(--b);border-radius:14px;padding:18px;text-align:center;background:var(--s);transition:.2s}
-#drop.ov{border-color:var(--a)}
-#pv{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:10px}#pv img{height:80px;border-radius:8px}
 .m{color:var(--m);font-size:13px}.er{color:#c42b1c;font-weight:600;min-height:1.2em;margin:.4em 0 0}
 #q{width:100%;max-width:340px;padding:8px 12px;border:1px solid var(--b);border-radius:9px;background:var(--s);margin-bottom:12px}
 #gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
@@ -66,12 +63,6 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <body>
 <header><h1>Quebra-Cabeças</h1><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mt" aria-label="Alternar tema claro ou escuro">Tema</button><button id="mu" aria-pressed="true" aria-label="Efeitos sonoros">🔊 Som</button></header>
 <main id="home" class="v"><div class="w">
-<section><h2>Crie seu próprio quebra-cabeça</h2>
-<div id="drop"><input id="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif" hidden>
-<p>Arraste uma foto até aqui ou <button id="pick">escolher arquivo</button></p>
-<p class="m">JPG, PNG, WEBP ou AVIF, até 15 MB. A foto é processada só no seu navegador.</p>
-<div id="pv" hidden><img id="pvi" alt="Pré-visualização da foto"><b id="pvn"></b><button id="pvg" class="pri">Montar</button><button id="pvr">Remover</button></div>
-<p id="st" class="m" role="status"></p><p id="er" class="er" role="alert"></p></div></section>
 <section><h2>Galeria</h2><input id="q" type="search" placeholder="Buscar por nome" aria-label="Buscar imagem pelo nome"><div id="gal"></div><p id="gm" class="m"></p></section>
 </div></main>
 <div id="game" class="v" hidden>
@@ -85,11 +76,10 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <label><input type="checkbox" id="rf" checked> Mostrar imagem de referência</label>
 <menu><button data-x>Cancelar</button><button id="go" class="pri">Iniciar jogo</button></menu></dialog>
 <dialog id="sd"><h2>Placar</h2>
-<div><button id="c1" aria-pressed="true">Modelos</button> <button id="c2" aria-pressed="false">Personalizados</button></div>
 <p><select id="fm" aria-label="Modo"><option value="">Todos os modos<option value="classico">Clássico<option value="desafio">Desafio</select> <select id="fn" aria-label="Quantidade de peças"></select> <select id="fi" aria-label="Imagem"></select></p>
 <div id="sl"></div><menu><button id="sc">Limpar recordes</button><button data-x class="pri">Fechar</button></menu></dialog>
 <dialog id="hd"><h2>Explicação</h2><ul>
-<li>Escolha uma foto da galeria ou envie a sua, defina o número de peças e inicie o jogo.
+<li>Escolha uma imagem da galeria, defina o número de peças e inicie o jogo.
 <li>Arraste as peças com o mouse ou o dedo. Perto da posição correta, elas encaixam sozinhas. Peças vizinhas se unem e se movem juntas.
 <li>Modo desafio: as peças começam giradas. Selecione uma e use <kbd>R</kbd>, o botão Girar ou dê dois toques (ou duplo clique) sobre a peça. Gira 90° por vez e só encaixa na orientação certa.
 <li>Fantasma mostra a imagem translúcida sobre o tabuleiro. Dica destaca onde a peça selecionada vai. Bordas mostra só as peças externas. Organizar espalha as peças soltas. Ajustar muda o tamanho do tabuleiro.
@@ -104,7 +94,7 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <div><button id="wa" class="pri">Jogar novamente</button> <button id="wo">Escolher outra imagem</button></div></dialog>
 <script>
 (()=>{
-const $=i=>document.getElementById(i),CFG={maxMB:15,tol:.3,minPx:200,tmo:3e4,counts:[12,24,48,72,100,150,200]},SK='jigsaw.scores.v1',
+const $=i=>document.getElementById(i),CFG={tol:.3,tmo:3e4,counts:[12,24,48,72,100,150,200]},SK='jigsaw.scores.v1',
 ls=(k,v)=>{try{return v===undefined?localStorage.getItem(k):localStorage.setItem(k,v)}catch{}},
 RM=matchMedia('(prefers-reduced-motion:reduce)').matches,
 esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';'),
@@ -113,7 +103,7 @@ p2=n=>String(n).padStart(2,'0'),fmt=ms=>{const s=Math.floor(ms/1e3);return p2(s/
 ld=()=>{try{return JSON.parse(ls(SK)||'[]')}catch{return[]}},
 mul=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296},
 stage=$('stage'),KS=[1,.8,.65],D=[[1,0],[-1,0],[0,1],[0,-1]];
-let items=[],cur,up,P=[],EH,EV,N,N0=48,cols,rows,IW,IH,L,SW,SH,game,paused,won,chal,sel,drag,Z,placed,ki,ghostOn,el0=0,t0=0,ht,sc='modelo',tabEntry,lastTap;
+let items=[],cur,P=[],EH,EV,N,N0=48,cols,rows,IW,IH,L,SW,SH,game,paused,won,chal,sel,drag,Z,placed,ki,ghostOn,el0=0,t0=0,ht,tabEntry,lastTap;
 /* tema e diálogos */
 const setTh=t=>{document.documentElement.dataset.theme=t;ls('theme',t)};
 setTh(ls('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
@@ -127,7 +117,7 @@ document.onvisibilitychange=()=>document.hidden&&setPause(true);
 const modal=d=>{setPause(true);$(d).showModal()};
 $('bp').onclick=()=>setPause(!paused);$('bc').onclick=()=>setPause(false);
 /* menu */
-function home(){relG();game=false;won=false;stop();el0=0;P.forEach(p=>p.el.remove());P=[];$('game').hidden=true;$('home').hidden=false}
+function home(){game=false;won=false;stop();el0=0;P.forEach(p=>p.el.remove());P=[];$('game').hidden=true;$('home').hidden=false}
 $('mn').onclick=()=>{if(game&&!won&&!confirm('Descartar a partida em andamento?'))return;home()};
 $('ms').onclick=()=>{rs();modal('sd')};$('mh').onclick=()=>modal('hd');$('mc').onclick=()=>modal('cd');
 
@@ -182,110 +172,9 @@ function render(){
 $('q').oninput=render;
 render();
 
-/* envio de foto (processamento local) */
-const er=m=>$('er').textContent=m,st=m=>$('st').textContent=m;addEventListener('error',e=>er('Erro no script: '+e.message));
-/* ===== URLs temporárias: gerenciador central. Donos: 'up' = seleção/pré-visualização, 'game' = partida em curso.
-   Uma URL só é revogada quando o último dono a libera. ===== */
-const URLs=(()=>{const m=new Map();return{make(b,o){const u=URL.createObjectURL(b);m.set(u,new Set([o]));return u},hold(u,o){const s=m.get(u);s&&s.add(o)},
- drop(u,o){const s=m.get(u);if(!s)return;s.delete(o);if(!s.size){URL.revokeObjectURL(u);m.delete(u)}},n:()=>m.size}})();
-self.__qc={urls:()=>URLs.n()};/* diagnóstico: console > __qc.urls() deve ser 0 ou 1 fora de partida */
-let gsrc=null;
-const holdG=()=>{if(gsrc&&gsrc!==cur.src)URLs.drop(gsrc,'game');gsrc=cur.src;URLs.hold(cur.src,'game')},
- relG=()=>{if(gsrc)URLs.drop(gsrc,'game');gsrc=null;['th','wi','pdi','ci'].forEach(i=>$(i).removeAttribute('src'));$('ghost').style.backgroundImage=''};
-function free(){if(up)URLs.drop(up.src,'up');up=null;$('pvi').removeAttribute('src');$('pv').hidden=true}
-/* ===== limites adaptativos (maior lado E total de pixels, sempre respeitando a proporção) ===== */
+/* detecção de aparelho (usada para reduzir efeitos em celulares fracos) */
 const MOB=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&matchMedia('(pointer:coarse)').matches)||navigator.deviceMemory<=2,
- lim=()=>MOB?{s:2048,px:4e6}:{s:2560,px:2560*2560},
- fitTo=(w,h)=>{const l=lim(),k=Math.min(1,l.s/Math.max(w,h),Math.sqrt(l.px/(w*h)));return{k,W:Math.max(1,Math.floor(w*k)),H:Math.max(1,Math.floor(h*k))}},
- E=c=>Object.assign(Error(c),{code:c});
-const LITE=MOB&&(navigator.deviceMemory<=3||navigator.hardwareConcurrency<=4);document.documentElement.classList.toggle('lite',!!LITE);
-/* ===== SHA-256 do arquivo original (mesmo resultado de crypto.subtle) ===== */
-const rd=b=>b.arrayBuffer?b.arrayBuffer():new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result);r.onerror=()=>no(r.error);r.readAsArrayBuffer(b)}),
- K=(()=>{const p=[];for(let n=2;p.length<64;n++)if(p.every(q=>n%q))p.push(n);return{k:p.map(q=>Math.cbrt(q)%1*4294967296>>>0),h:p.slice(0,8).map(q=>Math.sqrt(q)%1*4294967296>>>0)}})();
-/* em blocos de 1 MiB: nunca existe uma cópia inteira do arquivo em memória */
-async function sha(f,sig){const h=Uint32Array.from(K.h),w=new Uint32Array(64),k=K.k,
- blk=(b,o)=>{for(let i=0;i<16;i++)w[i]=b[o+4*i]<<24|b[o+4*i+1]<<16|b[o+4*i+2]<<8|b[o+4*i+3];
-  for(let i=16;i<64;i++){const a=w[i-15],c=w[i-2];w[i]=w[i-16]+((a>>>7|a<<25)^(a>>>18|a<<14)^a>>>3)+w[i-7]+((c>>>17|c<<15)^(c>>>19|c<<13)^c>>>10)}
-  let a=h[0],b2=h[1],c2=h[2],d=h[3],e=h[4],g2=h[5],g=h[6],hh=h[7];
-  for(let i=0;i<64;i++){const t1=(hh+((e>>>6|e<<26)^(e>>>11|e<<21)^(e>>>25|e<<7))+((e&g2)^(~e&g))+k[i]+w[i])|0,t2=(((a>>>2|a<<30)^(a>>>13|a<<19)^(a>>>22|a<<10))+((a&b2)^(a&c2)^(b2&c2)))|0;hh=g;g=g2;g2=e;e=(d+t1)|0;d=c2;c2=b2;b2=a;a=(t1+t2)|0}
-  h[0]+=a;h[1]+=b2;h[2]+=c2;h[3]+=d;h[4]+=e;h[5]+=g2;h[6]+=g;h[7]+=hh},full=f.size-f.size%64,C=1<<20;
- for(let o=0;o<full;o+=C){if(sig&&sig.aborted)throw E('abort');const u=new Uint8Array(await rd(f.slice(o,Math.min(o+C,full))));for(let i=0;i<u.length;i+=64)blk(u,i)}
- const r=new Uint8Array(await rd(f.slice(full))),t=new Uint8Array(r.length<56?64:128),dv=new DataView(t.buffer);t.set(r);t[r.length]=128;
- dv.setUint32(t.length-8,Math.floor(f.size/536870912));dv.setUint32(t.length-4,(f.size<<3)>>>0);for(let i=0;i<t.length;i+=64)blk(t,i);
- return[...h].map(x=>x.toString(16).padStart(8,'0')).join('')}
-/* mesmo formato de id do placar: 'u-'+SHA-256 hex; sem crypto.subtle (http) mantém o id antigo por nome/tamanho/data */
-async function hash(f,sig){const fb=`u-${f.name}-${f.size}-${f.lastModified}`;if(!(self.crypto&&crypto.subtle))return fb;
- try{let hx;if(f.size<=4e6){try{hx=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await rd(f)))].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(x){if(sig&&sig.aborted)throw x}}
-  return'u-'+(hx||await sha(f,sig))}
- catch(x){if(sig&&sig.aborted)throw x;return fb}/* leitura direta de bytes falhou (comum em content:// no Android): usa o id de reserva e segue pela URL do arquivo */}
-/* ===== operações canceláveis ===== */
-const load=(u,sig)=>new Promise((ok,no)=>{if(sig.aborted)return no(E('abort'));const i=new Image(),ab=()=>{i.onload=i.onerror=null;i.removeAttribute('src');no(E('abort'))};
-  sig.addEventListener('abort',ab,{once:true});i.onload=()=>{sig.removeEventListener('abort',ab);ok(i)};i.onerror=()=>{sig.removeEventListener('abort',ab);no(E('decode'))};i.src=u}),
- /* createImageBitmap não aceita cancelamento: ao abortar, rejeitamos já e fechamos o bitmap que chegar atrasado */
- bmp=(f,o,sig)=>new Promise((ok,no)=>{if(sig.aborted)return no(E('abort'));let dead=0;const ab=()=>{dead=1;no(E('abort'))};sig.addEventListener('abort',ab,{once:true});
-  createImageBitmap(f,{imageOrientation:'from-image',...o}).catch(()=>createImageBitmap(f,o)).then(b=>{sig.removeEventListener('abort',ab);dead?b.close():ok(b)},x=>{sig.removeEventListener('abort',ab);no(x)})}),
- blob=(c,sig)=>new Promise((ok,no)=>{if(sig.aborted)return no(E('abort'));const ab=()=>no(E('abort'));sig.addEventListener('abort',ab,{once:true});
-  c.toBlob(b=>{sig.removeEventListener('abort',ab);b?ok(b):no(E('oom'))},'image/jpeg',.9)}),
- rel=s=>{if(!s)return;if(s.close)s.close();else{s.onload=s.onerror=null;s.removeAttribute('src')}},
- NUBE='Não foi possível ler o arquivo no aparelho. Se a foto estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o celular e tente novamente.',
- M={size:`A imagem tem mais de ${CFG.maxMB} MB.`,fmt:'Formato não aceito. Use JPG, PNG, WEBP ou AVIF.',cloud:NUBE,
-  heic:'Esta foto está em HEIC/HEIF, formato que este navegador não abre. No iPhone use Ajustes > Câmera > Formatos > Mais compatível; no Android, compartilhe ou exporte como JPG.',
-  small:`Imagem pequena demais (mínimo de ${CFG.minPx}px no lado menor).`,
-  timeout:'Tempo excedido ao processar a foto (30 s). Tente uma foto menor ou feche outros aplicativos.',
-  oom:'O aparelho ficou sem memória para processar esta foto. Feche outras abas ou aplicativos, ou envie uma versão com resolução menor.',
-  corrupt:'O arquivo parece corrompido ou incompleto. Copie-o novamente ou escolha outra foto.',
-  unk:'Não foi possível abrir este arquivo. Use uma foto JPG, PNG, WEBP ou AVIF válida.'};
-/* identifica o formato real pelos primeiros bytes (só para escolher a mensagem de erro) */
-async function kind(f){try{const b=new Uint8Array(await rd(f.slice(0,16))),s=(i,j)=>String.fromCharCode(...b.slice(i,j));
- if(b[0]===255&&b[1]===216)return'jpeg';if(s(1,4)==='PNG')return'png';if(s(0,4)==='RIFF'&&s(8,12)==='WEBP')return'webp';
- if(s(4,8)==='ftyp')return/^avi[fs]$/.test(s(8,12))?'avif':'heic';if(s(0,3)==='GIF')return'gif'}catch{}return'?'}
-/* arquivo truncado? (JPEG sem EOI, PNG sem IEND) — só para escolher a mensagem de erro */
-async function trunc(f,k){try{const b=new Uint8Array(await rd(f.slice(-16)));if(k==='png')return String.fromCharCode(...b.slice(-8,-4))!=='IEND';
- if(k==='jpeg'){let n=b.length;while(n>0&&!b[n-1])n--;return!(b[n-2]===255&&b[n-1]===217)}}catch{}return false}
-/* Decodificação. O original nunca é alterado.
-   1) mede as dimensões com <img> (em Chrome/Firefox o onload não força a decodificação completa);
-   2) se já cabe nos limites, usa o original sem converter;
-   3) senão createImageBitmap já pedindo o tamanho final (o navegador PODE ainda decodificar em resolução cheia
-      internamente — não há garantia) e desenha num canvas do tamanho final -> JPEG 0,90 via toBlob;
-   4) sem createImageBitmap: fallback pelo <img> + canvas. Fundo branco preservado (transparência). */
-async function decode(f,op){const sig=op.sig,u=URLs.make(f,'up'),HB=!!self.createImageBitmap;let s,dm,keep;
- try{
-  try{s=await load(u,sig);dm=[s.naturalWidth,s.naturalHeight]}catch(x){if(sig.aborted)throw x}
-  if(dm&&dm[0]&&dm[1]&&fitTo(dm[0],dm[1]).k>=1){rel(s);s=null;keep=u;return{src:u,w:dm[0],h:dm[1]}}
-  if(HB){rel(s);s=null;const t=dm&&dm[0]&&dm[1]?fitTo(dm[0],dm[1]):null;
-   for(const o of t?[{resizeWidth:t.W,resizeHeight:t.H,resizeQuality:'high'},{}]:[{resizeWidth:lim().s,resizeQuality:'high'},{}]){try{s=await bmp(f,o,sig);break}catch(x){if(sig.aborted)throw x}}}
-  if(!s&&HB){try{s=await load(u,sig)}catch(x){if(sig.aborted)throw x}}/* createImageBitmap também lê bytes: plano B pelo <img> */
-  if(!s)throw E('decode');
-  const w=s.naturalWidth||s.width,h=s.naturalHeight||s.height,t=fitTo(w,h),c=document.createElement('canvas');let b;
-  try{c.width=t.W;c.height=t.H;const x=c.getContext('2d');if(!x)throw E('oom');x.fillStyle='#fff';x.fillRect(0,0,t.W,t.H);x.imageSmoothingQuality='high';x.drawImage(s,0,0,t.W,t.H);rel(s);s=null;b=await blob(c,sig)}
-  finally{rel(s);s=null;c.width=c.height=0}
-  keep=URLs.make(b,'up');return{src:keep,w:t.W,h:t.H}}
- finally{rel(s);if(keep!==u)URLs.drop(u,'up')}}
-/* um único processamento por vez; resultados de operações invalidadas são descartados */
-let busy=0,OP;const dz=$('drop'),setBusy=v=>{busy=v;['pick','pvg','pvr'].forEach(i=>$(i).disabled=!!v);dz.setAttribute('aria-busy',!!v)};
-async function pick(f){if(!f){$('file').value='';return}if(busy)return er('Aguarde: a foto anterior ainda está sendo processada.');er('');st('');
- const op=OP={ac:new AbortController(),to:0};op.sig=op.ac.signal;const tm=setTimeout(()=>{op.to=1;op.ac.abort()},CFG.tmo);setBusy(1);let k='?',r;
- try{
-  if(f.size>CFG.maxMB*1048576)throw E('size');
-  if(/^image\/(gif|bmp|svg|tiff|x-icon)/.test(f.type)||f.type&&!/^image\//.test(f.type))throw E('fmt');
-  st('Lendo a foto…');k=await kind(f);if(k==='gif')throw E('fmt');if(!f.size)throw E('cloud');
-  const id=await hash(f,op.sig);/* hash antes da decodificação: nunca coexiste com os buffers da imagem */
-  st('Preparando a foto…');r=await decode(f,op);
-  if(op!==OP||op.sig.aborted)throw E('abort');
-  if(Math.min(r.w,r.h)<CFG.minPx)throw E('small');
-  free();up={src:r.src,name:f.name,id};r=null;$('pvi').src=up.src;$('pvn').textContent=f.name;$('pv').hidden=false
- }catch(x){
-  if(r)URLs.drop(r.src,'up');let c=x&&x.code;if(c==='abort'&&!op.to)return;
-  if(op.to)c='timeout';else if(!c||c==='decode'){const n=x&&x.name;
-   if(n==='NotReadableError'||n==='NotFoundError')c='cloud';else if(n==='RangeError'||/memory|alloc/i.test(x&&x.message||''))c='oom';
-   else c=k==='heic'?'heic':k==='?'?'unk':await trunc(f,k)?'corrupt':'decode'}
-  er((c==='cloud'?NUBE+` [${x&&x.name||'sem arquivo'}]`:M[c])||`Não foi possível decodificar esta imagem (${k}, ${(f.size/1048576).toFixed(1)} MB). Se ela estiver na nuvem (Google Fotos, iCloud, Drive), baixe-a para o aparelho; se for muito grande, reduza a resolução e envie de novo.`)
- }finally{clearTimeout(tm);if(OP===op)OP=null;$('file').value='';setBusy(0);st('')}}
-/* o input só é limpo no fim do processamento (sucesso ou erro): limpar antes pode invalidar a leitura de arquivos content:// no Android */
-$('pick').onclick=()=>$('file').click();$('file').onchange=e=>pick(e.target.files[0]);$('pvr').onclick=free;
-$('pvg').onclick=()=>{const o=up;if(o&&!busy)openCfg({id:o.id,name:o.name,src:o.src,cat:'personalizado'})};
-dz.ondragover=e=>{e.preventDefault();dz.classList.add('ov')};dz.ondragleave=()=>dz.classList.remove('ov');dz.ondrop=e=>{e.preventDefault();dz.classList.remove('ov');pick(e.dataTransfer.files[0])};
-addEventListener('dragover',e=>e.preventDefault());addEventListener('drop',e=>e.preventDefault());
+ LITE=MOB&&(navigator.deviceMemory<=3||navigator.hardwareConcurrency<=4);document.documentElement.classList.toggle('lite',!!LITE);
 /* configuração */
 function grid(n,w,h){let best,bc=1e9;for(let c=1;c<=n;c++)for(let r=1;r<=n;r++){const m=c*r;if(m<n*.8||m>n*1.25)continue;const k=Math.abs(Math.log(w/c/(h/r)))*4+Math.abs(m-n)/n;if(k<bc){bc=k;best=[c,r]}}return best}
 const upd=()=>{const[c,r]=grid(+$('np').value,cur.w,cur.h);$('real').textContent=`Serão geradas ${c*r} peças (${c} × ${r}).`};
@@ -308,7 +197,7 @@ function pathOf(p){const{cw,ch,pad}=L,x=p.c*cw,y=p.r*ch,ox=x-pad,oy=y-pad,f=q=>(
  return d+'Z'}
 /* partida */
 function begin(){
- holdG();P.forEach(p=>p.el.remove());P=[];L=null;sel=drag=null;placed=0;Z=10;ki=0;won=false;paused=false;stage.classList.remove('ed','fin');
+ P.forEach(p=>p.el.remove());P=[];L=null;sel=drag=null;placed=0;Z=10;ki=0;won=false;paused=false;stage.classList.remove('ed','fin');
  IW=cur.w;IH=cur.h;[cols,rows]=grid(N0,IW,IH);N=cols*rows;
  const rnd=mul(Date.now()),J=()=>[0,0,0,0,0].map(()=>(rnd()-.5)*.08);
  EH=Array.from({length:rows+1},(_,r)=>Array.from({length:cols},()=>({s:r&&r<rows?(rnd()<.5?1:-1):0,j:J()})));
@@ -396,13 +285,12 @@ function save(ms){const a=ld(),e={cat:cur.cat,id:cur.id,name:cur.name,n:N,m:chal
  const g=a.filter(x=>x.cat===e.cat&&x.id===e.id&&x.n===e.n&&x.m===e.m).sort((x,y)=>x.t-y.t),drop=g.slice(10),rk=g.indexOf(e);
  ls(SK,JSON.stringify(a.filter(x=>!drop.includes(x))));
  return rk===0?'Novo recorde pessoal!':rk<10?`Entre os 10 melhores (nº ${rk+1})`:''}
-function rs(){const a=ld().filter(x=>x.cat===sc),fm=$('fm'),fn=$('fn'),fi=$('fi'),
+function rs(){const a=ld().filter(x=>x.cat==='modelo'),fm=$('fm'),fn=$('fn'),fi=$('fi'),
  opt=(el,p,all)=>{const v=el.value;el.innerHTML=`<option value="">${all}</option>`+p.map(([k,l])=>`<option value="${esc(k)}">${esc(l)}</option>`).join('');el.value=v};
  opt(fn,[...new Set(a.map(x=>x.n))].sort((x,y)=>x-y).map(n=>[n,n+' peças']),'Todas as peças');opt(fi,[...new Map(a.map(x=>[x.id,x.name]))],'Todas as imagens');
  const G={};a.filter(x=>(!fm.value||x.m===fm.value)&&(!fn.value||x.n==fn.value)&&(!fi.value||x.id===fi.value)).forEach(x=>(G[x.id+'|'+x.n+'|'+x.m]||=[]).push(x));
  $('sl').innerHTML=Object.values(G).map(g=>g.sort((x,y)=>x.t-y.t)).sort((x,y)=>x[0].name.localeCompare(y[0].name)).map(g=>
   `<h3>${esc(g[0].name)} · ${g[0].n} peças · ${g[0].m==='desafio'?'Desafio':'Clássico'}</h3><ol>${g.slice(0,10).map(x=>`<li>${fmt(x.t)} <span class="m">${new Date(x.d).toLocaleDateString('pt-BR')}</span>`).join('')}</ol>`).join('')||'<p class="m">Nenhum resultado ainda.</p>'}
-[['c1','modelo'],['c2','personalizado']].forEach(([i,v])=>$(i).onclick=()=>{sc=v;$('c1').setAttribute('aria-pressed',v==='modelo');$('c2').setAttribute('aria-pressed',v!=='modelo');rs()});
 ['fm','fn','fi'].forEach(i=>$(i).onchange=rs);
 $('sc').onclick=()=>{if(confirm('Apagar todos os recordes?')){ls(SK,'[]');rs()}};
 /* som de vitória (Web Audio, sem arquivos). Preferência em chave própria. */
