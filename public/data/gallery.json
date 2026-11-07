@@ -1,13 +1,1 @@
-[
-  {
-    "id": "a-arca-de-noe",
-    "name": "A Arca de Noé",
-    "filename": "A Arca de Noé.png",
-    "src": "public/images/puzzles/A%20Arca%20de%20No%C3%A9.png",
-    "width": 1280,
-    "height": 955,
-    "orientation": "landscape",
-    "featured": true,
-    "order": 0
-  }
-]
+[]
