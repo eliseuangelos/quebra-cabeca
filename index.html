@@ -214,9 +214,10 @@ async function sha(f,sig){const h=Uint32Array.from(K.h),w=new Uint32Array(64),k=
  dv.setUint32(t.length-8,Math.floor(f.size/536870912));dv.setUint32(t.length-4,(f.size<<3)>>>0);for(let i=0;i<t.length;i+=64)blk(t,i);
  return[...h].map(x=>x.toString(16).padStart(8,'0')).join('')}
 /* mesmo formato de id do placar: 'u-'+SHA-256 hex; sem crypto.subtle (http) mantém o id antigo por nome/tamanho/data */
-async function hash(f,sig){if(!(self.crypto&&crypto.subtle))return`u-${f.name}-${f.size}-${f.lastModified}`;let hx;
- if(f.size<=4e6){try{hx=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await rd(f)))].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(x){if(sig&&sig.aborted)throw x}}
- return'u-'+(hx||await sha(f,sig))}
+async function hash(f,sig){const fb=`u-${f.name}-${f.size}-${f.lastModified}`;if(!(self.crypto&&crypto.subtle))return fb;
+ try{let hx;if(f.size<=4e6){try{hx=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await rd(f)))].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(x){if(sig&&sig.aborted)throw x}}
+  return'u-'+(hx||await sha(f,sig))}
+ catch(x){if(sig&&sig.aborted)throw x;return fb}/* leitura direta de bytes falhou (comum em content:// no Android): usa o id de reserva e segue pela URL do arquivo */}
 /* ===== operações canceláveis ===== */
 const load=(u,sig)=>new Promise((ok,no)=>{if(sig.aborted)return no(E('abort'));const i=new Image(),ab=()=>{i.onload=i.onerror=null;i.removeAttribute('src');no(E('abort'))};
   sig.addEventListener('abort',ab,{once:true});i.onload=()=>{sig.removeEventListener('abort',ab);ok(i)};i.onerror=()=>{sig.removeEventListener('abort',ab);no(E('decode'))};i.src=u}),
@@ -253,6 +254,7 @@ async function decode(f,op){const sig=op.sig,u=URLs.make(f,'up'),HB=!!self.creat
   if(dm&&dm[0]&&dm[1]&&fitTo(dm[0],dm[1]).k>=1){rel(s);s=null;keep=u;return{src:u,w:dm[0],h:dm[1]}}
   if(HB){rel(s);s=null;const t=dm&&dm[0]&&dm[1]?fitTo(dm[0],dm[1]):null;
    for(const o of t?[{resizeWidth:t.W,resizeHeight:t.H,resizeQuality:'high'},{}]:[{resizeWidth:lim().s,resizeQuality:'high'},{}]){try{s=await bmp(f,o,sig);break}catch(x){if(sig.aborted)throw x}}}
+  if(!s&&HB){try{s=await load(u,sig)}catch(x){if(sig.aborted)throw x}}/* createImageBitmap também lê bytes: plano B pelo <img> */
   if(!s)throw E('decode');
   const w=s.naturalWidth||s.width,h=s.naturalHeight||s.height,t=fitTo(w,h),c=document.createElement('canvas');let b;
   try{c.width=t.W;c.height=t.H;const x=c.getContext('2d');if(!x)throw E('oom');x.fillStyle='#fff';x.fillRect(0,0,t.W,t.H);x.imageSmoothingQuality='high';x.drawImage(s,0,0,t.W,t.H);rel(s);s=null;b=await blob(c,sig)}
