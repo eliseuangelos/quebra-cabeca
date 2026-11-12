@@ -81,10 +81,6 @@ Além do modo clássico, o jogo oferece um modo desafio com rotação das peças
 
 As imagens da galeria são cadastradas manualmente no vetor `FILES`, localizado no arquivo `index.html`. Cada registro contém um identificador, o nome que será mostrado na tela e o caminho da imagem dentro de `public/images/puzzles/`. A ordem dos registros define a ordem de exibição.
 
-Atualmente, a galeria inclui **A Arca de Noé**, **Davi e Golias**, **Daniel na Cova dos Leões** e **Crianças Brincando**. As miniaturas usam carregamento lento nativo do navegador.
-
-> **Nota técnica:** a versão pública analisada não utiliza um catálogo JSON, não examina automaticamente a pasta de imagens e não consulta a API do GitHub para descobrir novos arquivos. Para adicionar ou reordenar uma imagem, é necessário atualizar o vetor `FILES` em `index.html` e publicar a alteração.
-
 ## Tecnologias e recursos
 
 | Tecnologia ou recurso | Aplicação |
