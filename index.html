@@ -4,64 +4,125 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Quebra-Cabeças</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2710%27%20fill%3D%27%23000%27%2F%3E%3Cg%20fill%3D%27%23fff%27%3E%3Crect%20x%3D%279%27%20y%3D%2723%27%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%271.5%27%2F%3E%3Crect%20x%3D%2721.5%27%20y%3D%2715%27%20width%3D%277%27%20height%3D%279%27%2F%3E%3Ccircle%20cx%3D%2725%27%20cy%3D%2715.5%27%20r%3D%276%27%2F%3E%3Crect%20x%3D%2740%27%20y%3D%2735.5%27%20width%3D%279%27%20height%3D%277%27%2F%3E%3Ccircle%20cx%3D%2748.5%27%20cy%3D%2739%27%20r%3D%276%27%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%27%23000%27%3E%3Ccircle%20cx%3D%2716.5%27%20cy%3D%2739%27%20r%3D%276%27%2F%3E%3Crect%20x%3D%278%27%20y%3D%2735.5%27%20width%3D%278.5%27%20height%3D%277%27%2F%3E%3Ccircle%20cx%3D%2725%27%20cy%3D%2747.5%27%20r%3D%276%27%2F%3E%3Crect%20x%3D%2721.5%27%20y%3D%2747.5%27%20width%3D%277%27%20height%3D%278.5%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+<meta name="theme-color" content="#F4F7FB">
+<script>
+/* Anti-flash EXECUTIVE DIGITAL: aplica a escolha salva (dn-theme) ou a preferência do sistema antes da 1ª pintura.
+   A alternância e a persistência ficam a cargo do componente DAY & NIGHT EXPERIENCE. */
+(()=>{const k='dn-theme',r=document.documentElement;let t=null;
+try{const s=localStorage.getItem(k);if(s==='light'||s==='dark')t=s}catch{}
+if(!t)t=window.matchMedia?.('(prefers-color-scheme: dark)').matches?'dark':'light';
+r.setAttribute('data-theme',t)})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="icon" type="image/svg+xml" href="https://eliseuangelos.github.io/assets/icons/favicon.svg">
+<link rel="apple-touch-icon" href="https://eliseuangelos.github.io/assets/icons/apple-touch-icon.png">
 <style>
-:root{--bg:#f2f4f1;--s:#fff;--t:#1a2321;--m:#62706c;--a:#0d7c72;--b:#d9dfdc;--sh:0 6px 18px #0002}
-[data-theme=dark]{--bg:#16181a;--s:#232629;--t:#e9eeec;--m:#98a5a1;--a:#5fd0c0;--b:#383d40;--sh:0 6px 18px #0008}
+/* ============ EXECUTIVE DIGITAL v2.1 — tokens (DIA / NOITE pareados por nome) ============ */
+:root,:root[data-theme="light"]{
+ color-scheme:light;
+ --color-background:#F4F7FB;--color-surface:#FFFFFF;--color-surface-secondary:#E9EFF5;
+ --color-text:#162638;--color-text-secondary:#526579;--color-border:#D5DEE8;
+ --color-primary:#1D4263;--color-action:#2563EB;--color-accent:#0B7E82;--color-focus:#2563EB;
+ --color-on-action:#FFFFFF;--color-danger:#B42318;
+ --color-border-strong:color-mix(in srgb,var(--color-text-secondary) 70%,var(--color-surface));
+ --color-scrim:rgba(17,28,40,.6);--color-piece-shadow:rgba(17,28,40,.38);
+ --color-shadow:0 10px 30px rgba(22,38,56,.08);--color-theme-meta:#F4F7FB;
+ --font-sans:"Inter","Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+ --font-mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+ --page-gutter:20px;--dn-space:76px;
+ --radius-small:8px;--radius-medium:12px;--radius-large:18px;
+ --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:20px;--space-6:24px;--space-8:32px;
+ --motion-fast:180ms;--motion-standard:280ms;--ease-standard:cubic-bezier(.2,.7,.2,1)}
+:root[data-theme="dark"]{
+ color-scheme:dark;
+ --color-background:#111C28;--color-surface:#1B2A3A;--color-surface-secondary:#24364A;
+ --color-text:#EDF3F8;--color-text-secondary:#B7C5D3;--color-border:#3A4D60;
+ --color-primary:#91B7D8;--color-action:#83B4FF;--color-accent:#68CBC2;--color-focus:#83B4FF;
+ --color-on-action:#0B1522;--color-danger:#FF9E92;
+ --color-border-strong:color-mix(in srgb,var(--color-text-secondary) 70%,var(--color-surface));
+ --color-scrim:rgba(17,28,40,.6);--color-piece-shadow:rgba(0,0,0,.45);
+ --color-shadow:0 12px 32px rgba(0,0,0,.22);--color-theme-meta:#111C28}
+/* ============ base ============ */
 *{box-sizing:border-box}
-body{margin:0;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);color:var(--t);font:15px/1.45 system-ui,sans-serif}
-header{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--s);border-bottom:1px solid var(--b);overflow-x:auto;white-space:nowrap}
-h1{font-size:17px;margin:0 auto 0 0}h2{margin:.2em 0 .5em;font-size:18px}h3{margin:.8em 0 .2em;font-size:15px}
-button,select,input{font:inherit;color:inherit;accent-color:var(--a)}
-:root{color-scheme:light}[data-theme=dark]{color-scheme:dark}
-select,#q{background:var(--s);color:var(--t);border:1px solid var(--b);border-radius:9px;padding:6px 10px;max-width:100%}
-option{background:var(--s);color:var(--t)}
-a{color:var(--a)}[data-theme=dark] .er{color:#ff8a7a}
-#sd p{display:flex;flex-wrap:wrap;gap:8px}
-button{background:var(--s);border:1px solid var(--b);border-radius:9px;padding:6px 11px;cursor:pointer;transition:transform .12s,box-shadow .12s}
-button:hover{box-shadow:var(--sh);transform:translateY(-1px)}button:active{transform:scale(.96)}
-button[aria-pressed=true],.pri{background:var(--a);color:#fff;border-color:var(--a)}
-[data-theme=dark] button[aria-pressed=true],[data-theme=dark] .pri{color:#07201c}
-:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+html{background:var(--color-background)}
+body{margin:0;min-width:320px;height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--color-background);color:var(--color-text);font:400 1rem/1.6 var(--font-sans)}
+h1,h2,h3{color:var(--color-primary);font-weight:700;letter-spacing:-.01em;line-height:1.25}
+h1{font-size:1.125rem;margin:0}
+h2{margin:.2em 0 .5em;font-size:clamp(1.35rem,1rem + 1.2vw,1.75rem)}
+h3{margin:.9em 0 .2em;font-size:1.0625rem;font-weight:600}
+a{color:var(--color-action);text-underline-offset:3px}
+:focus-visible{outline:3px solid var(--color-focus);outline-offset:2px}
 [hidden]{display:none!important}
-kbd{border:1px solid var(--b);border-radius:4px;padding:0 4px}
-#home{flex:1;overflow:auto;padding:16px}.w{max-width:1100px;margin:auto}
+kbd{font:500 .85em var(--font-mono);background:var(--color-surface-secondary);border:1px solid var(--color-border);border-radius:4px;padding:0 5px}
+.m{color:var(--color-text-secondary);font-size:.8125rem}
+.er{color:var(--color-danger);font-weight:600;min-height:1.2em;margin:.4em 0 0}
+/* ============ componentes ============ */
+button,select,input{font:inherit;color:inherit;accent-color:var(--color-action)}
+button{min-height:40px;padding:var(--space-2) var(--space-4);background:var(--color-surface);color:var(--color-text);border:1px solid var(--color-border);border-radius:var(--radius-small);font-weight:500;cursor:pointer;white-space:nowrap;transition:transform var(--motion-fast) var(--ease-standard),box-shadow var(--motion-fast) var(--ease-standard),border-color var(--motion-fast) var(--ease-standard),background-color var(--motion-fast) var(--ease-standard)}
+button:hover{border-color:var(--color-action);box-shadow:var(--color-shadow);transform:translateY(-1px)}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.55;cursor:not-allowed;transform:none;box-shadow:none}
+button[aria-pressed=true],.pri{background:var(--color-action);border-color:var(--color-action);color:var(--color-on-action)}
+.danger{color:var(--color-danger);border-color:var(--color-danger)}.danger:hover{border-color:var(--color-danger)}
+select,#q{min-height:40px;background:var(--color-surface);color:var(--color-text);border:1px solid var(--color-border-strong);border-radius:var(--radius-small);padding:var(--space-2) var(--space-3);max-width:100%}
+option{background:var(--color-surface);color:var(--color-text)}
+dialog{padding:var(--space-6);border:1px solid var(--color-border);border-radius:var(--radius-large);background:var(--color-surface);color:var(--color-text);width:min(92vw,520px);box-shadow:var(--color-shadow)}
+dialog::backdrop{background:var(--color-scrim)}
+dialog label{display:block;margin:var(--space-2) 0}
+dialog menu{display:flex;gap:var(--space-2);justify-content:flex-end;padding:0;margin:var(--space-4) 0 0}
+#sd p{display:flex;flex-wrap:wrap;gap:var(--space-2)}
+/* cabeçalho: marca + menu; a folga à direita (--dn-space) é do controle DAY & NIGHT */
+.app-header{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-2) var(--space-4);padding:var(--space-2) var(--page-gutter);background:var(--color-surface);border-bottom:1px solid var(--color-border)}
+.brand{display:flex;align-items:center;gap:var(--space-3);min-height:48px}
+.brand img{width:36px;height:36px;flex:none}
+.toolbar{display:flex;align-items:center;gap:var(--space-2);margin:-5px auto -5px var(--space-4);padding:5px;overflow-x:auto;margin-inline-end:var(--dn-space)}
+@media(max-width:760px){.toolbar{flex:1 1 100%;margin:-5px 0}.brand{margin-inline-end:var(--dn-space)}}
+#mu{display:inline-flex;align-items:center;gap:var(--space-2)}#mu svg{width:18px;height:18px;flex:none}
+#mu[aria-pressed=true] .off,#mu[aria-pressed=false] .on{display:none}
+.site-footer{flex:none;display:flex;flex-wrap:wrap;justify-content:center;gap:0 var(--space-4);padding:var(--space-2) var(--page-gutter);background:var(--color-surface);border-top:1px solid var(--color-border);color:var(--color-text-secondary);font-size:.75rem;line-height:1.5}
+.site-footer p{margin:0}
+/* ============ galeria ============ */
+#home{flex:1;overflow:auto;padding:var(--space-6) var(--page-gutter)}.w{width:min(100%,1180px);margin:auto}
 .v{animation:in .35s}@keyframes in{from{opacity:0;transform:translateY(8px)}}
-.m{color:var(--m);font-size:13px}.er{color:#c42b1c;font-weight:600;min-height:1.2em;margin:.4em 0 0}
-#q{width:100%;max-width:340px;padding:8px 12px;border:1px solid var(--b);border-radius:9px;background:var(--s);margin-bottom:12px}
-#gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px}
-.card{display:block;padding:8px;text-align:left;border-radius:12px;box-shadow:var(--sh)}
-.card:hover{transform:translateY(-3px)}.card.on{outline:3px solid var(--a)}
-.ph{display:grid;place-items:center;aspect-ratio:4/3;border-radius:8px;overflow:hidden;background:var(--b);margin-bottom:6px}
+#q{width:100%;max-width:340px;margin-bottom:var(--space-4)}
+#gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
+.card{display:block;padding:var(--space-2);text-align:left;white-space:normal;border-radius:var(--radius-medium);box-shadow:var(--color-shadow)}
+.card:hover{transform:translateY(-3px)}.card.on{outline:3px solid var(--color-accent)}
+.ph{display:grid;place-items:center;aspect-ratio:4/3;border-radius:var(--radius-small);overflow:hidden;background:var(--color-surface-secondary);margin-bottom:6px}
 .card:not(.ok):not(.bad) .ph{animation:sh 1.1s infinite alternate}@keyframes sh{to{opacity:.5}}
-.ph img{width:100%;height:100%;object-fit:cover}.bad img{display:none}.bad .ph:after{content:"Imagem indisponível";font-size:12px;color:var(--m)}
-dialog{border:1px solid var(--b);border-radius:16px;background:var(--s);color:var(--t);width:min(92vw,520px);box-shadow:var(--sh)}dialog::backdrop{background:#0008}
-dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify-content:flex-end;padding:0;margin:12px 0 0}
-#ci,#pdi{display:block;max-width:100%;max-height:34dvh;margin:auto;object-fit:contain;border-radius:8px}#pdi{max-height:70dvh}
-#hud{display:flex;align-items:center;gap:6px;padding:6px 10px;overflow-x:auto;background:var(--s);border-bottom:1px solid var(--b);white-space:nowrap}
-#hud button{padding:4px 9px;font-size:13px}#hud #thb{padding:0;border:0;background:none}#th{height:34px;border-radius:5px;display:block}
-#tm{font:600 18px ui-monospace,monospace;min-width:56px}#gr{width:70px}
+.ph img{width:100%;height:100%;object-fit:cover}.bad img{display:none}.bad .ph:after{content:"Imagem indisponível";font-size:12px;color:var(--color-text-secondary)}
+#ci,#pdi{display:block;max-width:100%;max-height:34dvh;margin:auto;object-fit:contain;border-radius:var(--radius-small)}#pdi{max-height:70dvh}
+/* ============ jogo ============ */
+#hud{flex:none;display:flex;align-items:center;gap:6px;padding:6px var(--page-gutter);overflow-x:auto;background:var(--color-surface);border-bottom:1px solid var(--color-border);white-space:nowrap}
+#hud button{min-height:36px;padding:4px 10px;font-size:.8125rem}#hud #thb{min-height:0;padding:0;border:0;background:none;box-shadow:none}#th{height:34px;border-radius:5px;display:block}
+#tm{font:600 1.125rem var(--font-mono);color:var(--color-primary);min-width:60px}#gr{width:70px}
 #game{flex:1;display:flex;flex-direction:column;min-height:0}
-#stage{flex:1;position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:radial-gradient(circle,var(--s),var(--bg))}
+#stage{flex:1;position:relative;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:var(--color-surface-secondary)}
 #board,#ghost,#hint{position:absolute;pointer-events:none}
-#board{border:2px dashed var(--b);background:#8881;border-radius:3px}#ghost{display:none;background-repeat:no-repeat;opacity:.3}
-#hint{display:none;border:3px dashed var(--a);z-index:5}#hint.on{display:block;animation:bl .5s infinite alternate}@keyframes bl{to{background:#5fd0c066}}
+#board{border:2px dashed color-mix(in srgb,var(--color-text-secondary) 75%,transparent);background:color-mix(in srgb,var(--color-surface) 60%,transparent);border-radius:3px}#ghost{display:none;background-repeat:no-repeat;opacity:.3}
+#hint{display:none;border:3px dashed var(--color-accent);z-index:5}#hint.on{display:block;animation:bl .5s infinite alternate}@keyframes bl{to{background:color-mix(in srgb,var(--color-accent) 28%,transparent)}}
 .p{position:absolute;left:0;top:0;pointer-events:none;transition:transform .18s}
-.p.up{transition:none;filter:drop-shadow(0 8px 8px #0007)}
+.p.up{transition:none;filter:drop-shadow(0 8px 10px var(--color-piece-shadow))}
 .i{width:100%;height:100%;pointer-events:auto;background-repeat:no-repeat;cursor:grab;touch-action:none}.k .i{pointer-events:none}
-.p:focus-visible{outline:2px dashed var(--a)}.s .i,.fin .i{animation:pop .45s}@keyframes pop{50%{filter:brightness(1.4)}}
+.p:focus-visible{outline:2px dashed var(--color-focus)}.s .i,.fin .i{animation:pop .45s}@keyframes pop{50%{filter:brightness(1.4)}}
 .ed .p:not(.e){visibility:hidden}
-#pause{position:absolute;inset:0;z-index:99999;background:color-mix(in srgb,var(--bg) 94%,transparent);display:grid;place-content:center;gap:12px;text-align:center;font-size:22px}
-#win[open]{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;border:0;border-radius:0;text-align:center;overflow:hidden}
-#wi{max-width:92vw;max-height:55dvh;object-fit:contain;border-radius:10px;animation:gr .9s cubic-bezier(.2,.9,.3,1.2),gl 2s infinite alternate}
-@keyframes gr{from{transform:scale(.3);opacity:0}}@keyframes gl{from{box-shadow:0 0 20px #5fd0c055}to{box-shadow:0 0 60px #5fd0c0cc}}
+#pause{position:absolute;inset:0;z-index:99999;background:color-mix(in srgb,var(--color-background) 94%,transparent);display:grid;place-content:center;gap:var(--space-3);text-align:center;font-size:1.375rem}
+#win[open]{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-2);width:100vw;max-width:none;height:100dvh;max-height:none;margin:0;border:0;border-radius:0;text-align:center;overflow:hidden}
+#wi{max-width:92vw;max-height:55dvh;object-fit:contain;border-radius:var(--radius-medium);box-shadow:var(--color-shadow);animation:gr .9s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes gr{from{transform:scale(.3);opacity:0}}
 #cf{position:fixed;inset:0;pointer-events:none}
 .lite .p.up{filter:none}.lite .s .i,.lite .fin .i{animation:none}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/eliseuangelos/day-night-experience@v1.3.0/component/day-night.css">
 </head>
 <body>
-<header><h1>Quebra-Cabeças</h1><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mt" aria-label="Alternar tema claro ou escuro">Tema</button><button id="mu" aria-pressed="true" aria-label="Efeitos sonoros">🔊 Som</button></header>
+<header class="app-header">
+<div class="brand"><img src="https://eliseuangelos.github.io/assets/icons/brand-symbol.svg" alt="" width="36" height="36"><h1>Quebra-Cabeças</h1></div>
+<nav class="toolbar" aria-label="Menu do jogo"><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mu" aria-pressed="true" aria-label="Efeitos sonoros"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6m0-6-5 6"/></svg><span>Som</span></button></nav>
+</header>
 <main id="home" class="v"><div class="w">
 <section><h2>Galeria</h2><input id="q" type="search" placeholder="Buscar por nome" aria-label="Buscar imagem pelo nome"><div id="gal"></div><p id="gm" class="m"></p></section>
 </div></main>
@@ -69,6 +130,10 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <div id="hud"><span id="tm" role="timer">00:00</span><button id="bp">Pausar</button><button id="br">Reiniciar</button><button id="bg" aria-pressed="false">Fantasma</button><input id="gr" type="range" min="20" max="40" value="30" aria-label="Transparência do modo fantasma"><button id="bi" aria-pressed="true">Referência</button><button id="be" aria-pressed="false">Bordas</button><button id="bh">Dica</button><button id="bo">Organizar</button><button id="bt">Girar</button><button id="bf">Ajustar</button><button id="thb" aria-label="Ampliar a imagem de referência"><img id="th" alt=""></button></div>
 <div id="stage"><div id="board"></div><div id="ghost"></div><div id="hint"></div><div id="pause" hidden><b>Jogo pausado</b><button id="bc" class="pri">Continuar</button></div></div>
 </div>
+<footer class="site-footer">
+<p>Desenvolvido por <a href="https://eliseuangelos.github.io/" target="_blank" rel="noopener noreferrer">Eliseu Fernandes Laurindo</a></p>
+<p>© <span data-current-year></span> Eliseu Fernandes Laurindo. Todos os direitos reservados.</p>
+</footer>
 <dialog id="cfg"><h2 id="ct"></h2><img id="ci" alt="">
 <label>Peças <select id="np"></select></label><p id="real" class="m"></p>
 <label><input type="checkbox" id="ch"> Modo desafio (as peças começam giradas)</label>
@@ -77,7 +142,7 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <menu><button data-x>Cancelar</button><button id="go" class="pri">Iniciar jogo</button></menu></dialog>
 <dialog id="sd"><h2>Placar</h2>
 <p><select id="fm" aria-label="Modo"><option value="">Todos os modos<option value="classico">Clássico<option value="desafio">Desafio</select> <select id="fn" aria-label="Quantidade de peças"></select> <select id="fi" aria-label="Imagem"></select></p>
-<div id="sl"></div><menu><button id="sc">Limpar recordes</button><button data-x class="pri">Fechar</button></menu></dialog>
+<div id="sl"></div><menu><button id="sc" class="danger">Limpar recordes</button><button data-x class="pri">Fechar</button></menu></dialog>
 <dialog id="hd"><h2>Explicação</h2><ul>
 <li>Escolha uma imagem da galeria, defina o número de peças e inicie o jogo.
 <li>Arraste as peças com o mouse ou o dedo. Perto da posição correta, elas encaixam sozinhas. Peças vizinhas se unem e se movem juntas.
@@ -85,8 +150,9 @@ dialog label{display:block;margin:8px 0}dialog menu{display:flex;gap:8px;justify
 <li>Fantasma mostra a imagem translúcida sobre o tabuleiro. Dica destaca onde a peça selecionada vai. Bordas mostra só as peças externas. Organizar espalha as peças soltas. Ajustar muda o tamanho do tabuleiro.
 <li>Teclado: Tab vai para uma peça solta aleatória (Shift+Tab volta aos botões) e as setas movem a peça (Shift para passos maiores).</ul>
 <menu><button data-x class="pri">Fechar</button></menu></dialog>
-<dialog id="cd"><h2>Créditos</h2><p>Desenvolvimento: Eliseu Fernandes Laurindo</p>
+<dialog id="cd"><h2>Créditos</h2><p>Desenvolvido por <a href="https://eliseuangelos.github.io/" target="_blank" rel="noopener noreferrer">Eliseu Fernandes Laurindo</a></p>
 <p>Site pessoal: <a href="https://eliseuangelos.github.io" target="_blank" rel="noopener noreferrer">https://eliseuangelos.github.io</a></p>
+<p class="m">Identidade visual EXECUTIVE DIGITAL. Alternância de tema: <a href="https://github.com/eliseuangelos/day-night-experience" target="_blank" rel="noopener noreferrer">DAY &amp; NIGHT EXPERIENCE</a>. Fontes Inter e IBM Plex Mono (SIL Open Font License), servidas pelo Google Fonts.</p>
 <menu><button data-x class="pri">Fechar</button></menu></dialog>
 
 <dialog id="pd"><img id="pdi" alt="Imagem completa"><menu><button data-x class="pri">Fechar</button></menu></dialog>
@@ -104,10 +170,7 @@ ld=()=>{try{return JSON.parse(ls(SK)||'[]')}catch{return[]}},
 mul=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296},
 stage=$('stage'),KS=[1,.8,.65],D=[[1,0],[-1,0],[0,1],[0,-1]];
 let items=[],cur,P=[],EH,EV,N,N0=48,cols,rows,IW,IH,L,SW,SH,game,paused,won,chal,sel,drag,Z,placed,ki,ghostOn,el0=0,t0=0,ht,tabEntry,lastTap;
-/* tema e diálogos */
-const setTh=t=>{document.documentElement.dataset.theme=t;ls('theme',t)};
-setTh(ls('theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'));
-$('mt').onclick=()=>setTh(document.documentElement.dataset.theme==='dark'?'light':'dark');
+/* diálogos (o tema é controlado pelo DAY & NIGHT EXPERIENCE) */
 document.querySelectorAll('[data-x]').forEach(b=>b.onclick=()=>b.closest('dialog').close());
 /* cronômetro */
 const now=()=>el0+(t0?performance.now()-t0:0),run=()=>{t0||(t0=performance.now())},stop=()=>{el0=now();t0=0};
@@ -327,7 +390,7 @@ $('sc').onclick=()=>{if(confirm('Apagar todos os recordes?')){ls(SK,'[]');rs()}}
 const AK='jigsaw.audio.v1';let AC,snd=ls(AK)!=='0',ub=0;
 const au=()=>{try{AC||=new(self.AudioContext||self.webkitAudioContext)();if(AC.state!=='running')AC.resume().catch(()=>{});
   if(!ub&&AC.state!=='closed'){ub=1;const b=AC.createBufferSource();b.buffer=AC.createBuffer(1,1,22050);b.connect(AC.destination);b.start(0)}}catch{}},
- sb=()=>{$('mu').setAttribute('aria-pressed',snd);$('mu').textContent=(snd?'🔊':'🔇')+' Som'};
+ sb=()=>$('mu').setAttribute('aria-pressed',snd);
 ['pointerdown','keydown','touchend'].forEach(t=>addEventListener(t,au,{passive:true}));
 $('mu').onclick=()=>{snd=!snd;ls(AK,snd?'1':'0');sb();au()};sb();
 function fan(){if(!snd)return;try{au();if(!AC)return;const t=AC.currentTime+.05,m=AC.createGain();m.gain.value=.22;m.connect(AC.destination);
@@ -340,11 +403,24 @@ function win(){if(won)return;won=true;stop();const ms=now(),r=save(ms);stage.cla
  $('wi').src=cur.src;$('wt').textContent=`Quebra-cabeça concluído em ${fmt(ms)}.`;$('wm').textContent=`${N} peças · ${chal?'Modo desafio':'Modo clássico'}${r?' · '+r:''}`;
  setTimeout(()=>{try{$('win').showModal()}catch{}cf();fan()},RM?0:800)}
 function cf(){if(RM)return;const c=$('cf'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
- const ps=Array.from({length:LITE?70:150},()=>({x:Math.random()*c.width,y:-Math.random()*c.height*.6,vx:Math.random()*2-1,vy:2+Math.random()*4,s:6+Math.random()*6,h:Math.random()*360,r:Math.random()*6}));let f=0;
- (function a(){x.clearRect(0,0,c.width,c.height);for(const p of ps){p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=`hsl(${p.h} 85% 60%)`;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()}
+ const cs=getComputedStyle(document.documentElement),CC=['--color-action','--color-accent','--color-primary'].map(k=>cs.getPropertyValue(k).trim()),ps=Array.from({length:LITE?70:150},()=>({x:Math.random()*c.width,y:-Math.random()*c.height*.6,vx:Math.random()*2-1,vy:2+Math.random()*4,s:6+Math.random()*6,h:CC[Math.random()*CC.length|0],r:Math.random()*6}));let f=0;
+ (function a(){x.clearRect(0,0,c.width,c.height);for(const p of ps){p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.h;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()}
   if(++f<400&&$('win').open)requestAnimationFrame(a);else x.clearRect(0,0,c.width,c.height)})()}
 $('wa').onclick=()=>{$('win').close();begin()};$('wo').onclick=()=>{$('win').close();home()};
 })();
+</script>
+<script src="https://cdn.jsdelivr.net/gh/eliseuangelos/day-night-experience@v1.3.0/component/day-night.js"></script>
+<script>
+if(typeof DayNight!=='undefined'&&typeof DayNight.init==='function'){DayNight.init({position:'top-right'})}
+else{console.error('DAY & NIGHT EXPERIENCE não foi carregado. Verifique a URL e a conexão.')}
+</script>
+<script>
+/* theme-color acompanha data-theme */
+(()=>{const r=document.documentElement,m=document.querySelector('meta[name="theme-color"]');if(!m)return;
+const u=()=>m.setAttribute('content',r.getAttribute('data-theme')==='dark'?'#111C28':'#F4F7FB');u();
+new MutationObserver(u).observe(r,{attributes:true,attributeFilter:['data-theme']})})();
+/* ano dinâmico dos créditos */
+document.querySelectorAll('[data-current-year]').forEach(e=>e.textContent=String(new Date().getFullYear()));
 </script>
 </body>
 </html>
