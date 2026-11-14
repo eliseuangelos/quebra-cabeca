@@ -118,8 +118,6 @@ dialog menu{display:flex;gap:var(--space-2);justify-content:flex-end;padding:0;m
 .lite .p.up{filter:none}.lite .s .i,.lite .fin .i{animation:none}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
-<script src="https://eliseuangelos.github.io/day-night-experience/component/day-night.js"></script>
-<script>DayNight.init({ position: 'top-right' });</script>
 </head>
 <body>
 <header class="app-header">
@@ -411,11 +409,6 @@ function cf(){if(RM)return;const c=$('cf'),x=c.getContext('2d');c.width=innerWid
   if(++f<400&&$('win').open)requestAnimationFrame(a);else x.clearRect(0,0,c.width,c.height)})()}
 $('wa').onclick=()=>{$('win').close();begin()};$('wo').onclick=()=>{$('win').close();home()};
 })();
-</script>
-<script src="day-night/day-night.js"></script>
-<script>
-if(typeof DayNight!=='undefined'&&typeof DayNight.init==='function'){DayNight.init({position:'top-right'})}
-else{console.error('DAY & NIGHT EXPERIENCE não foi carregado. Verifique a URL e a conexão.')}
 </script>
 <script>
 /* theme-color acompanha data-theme */
