@@ -19,7 +19,7 @@ r.setAttribute('data-theme',t)})();
 <link rel="icon" type="image/svg+xml" href="https://eliseuangelos.github.io/assets/icons/favicon.svg">
 <link rel="apple-touch-icon" href="https://eliseuangelos.github.io/assets/icons/apple-touch-icon.png">
 <script src="https://eliseuangelos.github.io/day-night-experience/assets/js/theme-init.js"></script>
-<link rel="stylesheet" href="https://eliseuangelos.github.io/day-night-experience/component/day-night.css">
+<link rel="stylesheet" href="day-night/day-night.css">
 <style>
 /* ============ EXECUTIVE DIGITAL v2.1 — tokens (DIA / NOITE pareados por nome) ============ */
 :root,:root[data-theme="light"]{
@@ -124,7 +124,7 @@ dialog menu{display:flex;gap:var(--space-2);justify-content:flex-end;padding:0;m
 <body>
 <header class="app-header">
 <div class="brand"><img src="https://eliseuangelos.github.io/assets/icons/brand-symbol.svg" alt="" width="36" height="36"><h1>Quebra-Cabeças</h1></div>
-<nav class="toolbar" aria-label="Menu do jogo"><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mu" aria-pressed="true" aria-label="Efeitos sonoros"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6m0-6-5 6"/></svg><span>Som</span></button></nav>
+<nav class="toolbar" aria-label="Menu do jogo"><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mu" aria-pressed="true" aria-label="Efeitos sonoros"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6m0-6-5 6"/></svg><span>Som</span></button><div id="alternador"></div></nav>
 </header>
 <main id="home" class="v"><div class="w">
 <section><h2>Galeria</h2><input id="q" type="search" placeholder="Buscar por nome" aria-label="Buscar imagem pelo nome"><div id="gal"></div><p id="gm" class="m"></p></section>
@@ -412,7 +412,7 @@ function cf(){if(RM)return;const c=$('cf'),x=c.getContext('2d');c.width=innerWid
 $('wa').onclick=()=>{$('win').close();begin()};$('wo').onclick=()=>{$('win').close();home()};
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/gh/eliseuangelos/day-night-experience@v1.3.0/component/day-night.js"></script>
+<script src="day-night/day-night.js"></script>
 <script>
 if(typeof DayNight!=='undefined'&&typeof DayNight.init==='function'){DayNight.init({position:'top-right'})}
 else{console.error('DAY & NIGHT EXPERIENCE não foi carregado. Verifique a URL e a conexão.')}
