@@ -418,5 +418,8 @@ new MutationObserver(u).observe(r,{attributes:true,attributeFilter:['data-theme'
 document.querySelectorAll('[data-current-year]').forEach(e=>e.textContent=String(new Date().getFullYear()));
 </script>
 <script src="day-night/day-night.js"></script>
+<script>
+  DayNight.init({ target: '#alternador' });
+</script>
 </body>
 </html>
