@@ -18,6 +18,8 @@ r.setAttribute('data-theme',t)})();
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="icon" type="image/svg+xml" href="https://eliseuangelos.github.io/assets/icons/favicon.svg">
 <link rel="apple-touch-icon" href="https://eliseuangelos.github.io/assets/icons/apple-touch-icon.png">
+<script src="https://eliseuangelos.github.io/day-night-experience/assets/js/theme-init.js"></script>
+<link rel="stylesheet" href="https://eliseuangelos.github.io/day-night-experience/component/day-night.css">
 <style>
 /* ============ EXECUTIVE DIGITAL v2.1 — tokens (DIA / NOITE pareados por nome) ============ */
 :root,:root[data-theme="light"]{
@@ -116,7 +118,8 @@ dialog menu{display:flex;gap:var(--space-2);justify-content:flex-end;padding:0;m
 .lite .p.up{filter:none}.lite .s .i,.lite .fin .i{animation:none}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/eliseuangelos/day-night-experience@v1.3.0/component/day-night.css">
+<script src="https://eliseuangelos.github.io/day-night-experience/component/day-night.js"></script>
+<script>DayNight.init({ position: 'top-right' });</script>
 </head>
 <body>
 <header class="app-header">
