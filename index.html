@@ -27,7 +27,7 @@ r.setAttribute('data-theme',t)})();
  --color-primary:#1D4263;--color-action:#2563EB;--color-accent:#0B7E82;--color-focus:#2563EB;
  --color-on-action:#FFFFFF;--color-danger:#B42318;
  --color-border-strong:color-mix(in srgb,var(--color-text-secondary) 70%,var(--color-surface));
- --color-scrim:rgba(17,28,40,.6);--color-piece-shadow:rgba(17,28,40,.38);
+ --color-scrim:rgba(17,28,40,.6);--color-piece-shadow:rgba(17,28,40,.38);--color-skeleton-highlight:rgba(255,255,255,.7);
  --color-shadow:0 10px 30px rgba(22,38,56,.08);--color-theme-meta:#F4F7FB;
  --font-sans:"Inter","Manrope",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
  --font-mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
@@ -42,7 +42,7 @@ r.setAttribute('data-theme',t)})();
  --color-primary:#91B7D8;--color-action:#83B4FF;--color-accent:#68CBC2;--color-focus:#83B4FF;
  --color-on-action:#0B1522;--color-danger:#FF9E92;
  --color-border-strong:color-mix(in srgb,var(--color-text-secondary) 70%,var(--color-surface));
- --color-scrim:rgba(17,28,40,.6);--color-piece-shadow:rgba(0,0,0,.45);
+ --color-scrim:rgba(17,28,40,.6);--color-piece-shadow:rgba(0,0,0,.45);--color-skeleton-highlight:rgba(255,255,255,.08);
  --color-shadow:0 12px 32px rgba(0,0,0,.22);--color-theme-meta:#111C28}
 /* ============ base ============ */
 *{box-sizing:border-box}
@@ -86,13 +86,22 @@ dialog menu{display:flex;gap:var(--space-2);justify-content:flex-end;padding:0;m
 /* ============ galeria ============ */
 #home{flex:1;overflow:auto;padding:var(--space-6) var(--page-gutter)}.w{width:min(100%,1180px);margin:auto}
 .v{animation:in .35s}@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.gal-head{display:flex;flex-direction:column;align-items:center;text-align:center}
 #q{width:100%;max-width:340px;margin-bottom:var(--space-4)}
+#gm{text-align:center}
 #gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
 .card{display: inline-flex;flex-direction: column;justify-content: flex-start;align-items: center;gap: 6px;padding:var(--space-2);text-align:left;white-space:normal;border-radius:var(--radius-medium);box-shadow:var(--color-shadow);text-align: center;}
-.card:hover{transform:translateY(-3px)}.card.on{outline:3px solid var(--color-accent)}
-.ph{display:grid;place-items:center;aspect-ratio:4/3;border-radius:var(--radius-small);overflow:hidden;background:var(--color-surface-secondary);margin-bottom:6px}
-.card:not(.ok):not(.bad) .ph{animation:sh 1.1s infinite alternate}@keyframes sh{to{opacity:.5}}
-.ph img{width:100%;height:100%;object-fit:cover}.bad img{display:none}.bad .ph:after{content:"Imagem indisponível";font-size:12px;color:var(--color-text-secondary)}
+.card:hover{transform:translateY(-3px)}.card.on{outline:3px solid var(--color-accent)}.card.busy{cursor:progress}
+/* miniatura: o espaço (4/3) é reservado desde o início; a imagem só aparece, com fade, depois de carregada por inteiro.
+   Enquanto isso, um brilho suave percorre o espaço (.ld = carregando). Em .busy o mesmo brilho indica a abertura da imagem completa. */
+.ph{position:relative;isolation:isolate;display:grid;place-items:center;align-self:stretch;aspect-ratio:4/3;border-radius:var(--radius-small);overflow:hidden;background:var(--color-surface-secondary);margin-bottom:6px}
+.ph img{width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.04);transition:opacity .5s var(--ease-standard),transform .7s var(--ease-standard)}
+.card.ok .ph img{opacity:1;transform:none}
+.ph:before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(100deg,transparent 25%,var(--color-skeleton-highlight) 50%,transparent 75%);transform:translateX(-100%);transition:opacity .4s}
+.card.ld .ph:before,.card.busy .ph:before{animation:shimmer 1.5s ease-in-out infinite}
+.card.ok .ph:before{opacity:0}.card.busy .ph:before{opacity:1}
+@keyframes shimmer{to{transform:translateX(100%)}}
+.bad img,.bad .ph:before{display:none}.bad .ph:after{content:"Imagem indisponível";font-size:12px;color:var(--color-text-secondary)}
 #ci,#pdi{display:block;max-width:100%;max-height:34dvh;margin:auto;object-fit:contain;border-radius:var(--radius-small)}#pdi{max-height:70dvh}
 /* ============ jogo ============ */
 #hud{flex:none;display:flex;align-items:center;gap:6px;padding:6px var(--page-gutter);overflow-x:auto;background:var(--color-surface);border-bottom:1px solid var(--color-border);white-space:nowrap}
@@ -124,7 +133,7 @@ dialog menu{display:flex;gap:var(--space-2);justify-content:flex-end;padding:0;m
 <nav class="toolbar" aria-label="Menu do jogo"><button id="mn">Novo</button><button id="ms">Placar</button><button id="mh">Explicação</button><button id="mc">Créditos</button><button id="mu" aria-pressed="true" aria-label="Efeitos sonoros"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="m16 9 5 6m0-6-5 6"/></svg><span>Som</span></button><div id="alternador"></div></nav>
 </header>
 <main id="home" class="v"><div class="w">
-<section><h2>Galeria</h2><input id="q" type="search" placeholder="Buscar por nome" aria-label="Buscar imagem pelo nome"><div id="gal"></div><p id="gm" class="m"></p></section>
+<section><div class="gal-head"><h2>Galeria</h2><input id="q" type="search" placeholder="Buscar por nome" aria-label="Buscar imagem pelo nome" autocomplete="off"></div><div id="gal"></div><p id="gm" class="m" role="status"></p></section>
 </div></main>
 <div id="game" class="v" hidden>
 <div id="hud"><span id="tm" role="timer">00:00</span><button id="bp">Pausar</button><button id="br">Reiniciar</button><button id="bg" aria-pressed="false">Fantasma</button><input id="gr" type="range" min="20" max="40" value="30" aria-label="Transparência do modo fantasma"><button id="bi" aria-pressed="true">Referência</button><button id="be" aria-pressed="false">Bordas</button><button id="bh">Dica</button><button id="bo">Organizar</button><button id="bt">Girar</button><button id="bf">Ajustar</button><button id="thb" aria-label="Ampliar a imagem de referência"><img id="th" alt=""></button></div>
@@ -187,9 +196,13 @@ $('ms').onclick=()=>{rs();modal('sd')};$('mh').onclick=()=>modal('hd');$('mc').o
 /* GALERIA: links diretos das imagens cadastrados manualmente neste arquivo. */
 /*
   CADASTRO MANUAL DAS IMAGENS
-  - Cole cada endereço relativo completo no campo src.
-  - Os arquivos devem ficar em public/images/puzzles/.
-  - Use %20 para espaços e a codificação URL para caracteres acentuados.
+  1. Salve o desenho em public/images/puzzles/ (nome em minúsculas, com hifens e sem acentos).
+  2. Rode  python3 tools/gerar-miniaturas.py  : ele cria a miniatura WebP em public/images/thumbs/
+     e mostra o bloco pronto para colar abaixo.
+  3. Cole o bloco no vetor FILES e ajuste o campo name.
+  - Cole o endereço relativo completo no campo src. Use %20 para espaços e a codificação URL para acentos.
+  - A miniatura é localizada sozinha: mesmo nome do arquivo, extensão .webp, pasta public/images/thumbs/.
+    (Opcional: o campo thumb informa outro caminho.)
   - A ordem dos itens abaixo determina a ordem de exibição na galeria.
 */
 const FILES=[
@@ -237,30 +250,46 @@ const FILES=[
 
 items=FILES.map(image=>({...image}));
 
+/* Miniatura: derivada de src (puzzles/x.png vira thumbs/x.webp), salvo se o item trouxer thumb. */
+const thumbOf=i=>i.thumb||(i.src.includes('/puzzles/')?i.src.replace('/puzzles/','/thumbs/').replace(/\.[a-z0-9]+$/i,'.webp'):'');
+
+/* Carrega a miniatura de um card. A imagem só é revelada depois de baixada e decodificada por inteiro;
+   até lá o card mostra o espaço reservado com o brilho de carregamento (.ld). */
+function loadThumb(c){
+ if(c.started)return;c.started=true;
+ const{el,im,item}=c,th=thumbOf(item);let orig=!th||th===item.src;
+ el.classList.add('ld');
+ const show=()=>{el.classList.add('ok');setTimeout(()=>el.classList.remove('ld'),600)};
+ im.onload=()=>{im.decode?im.decode().then(show,show):show()};
+ im.onerror=()=>{
+  if(!orig){orig=true;console.warn(`Miniatura ausente (${th}). Usando a imagem original; rode tools/gerar-miniaturas.py.`);im.src=item.src}
+  else{el.classList.remove('ld');el.classList.add('bad')}};
+ im.src=th||item.src}
+
+/* Os cards são criados uma única vez; a busca apenas mostra/oculta (nada é recarregado a cada letra digitada). */
+const cards=items.map(item=>{
+ const el=document.createElement('button'),ph=document.createElement('span'),nm=document.createElement('span'),im=new Image();
+ el.type='button';el.className='card';ph.className='ph';im.alt='';im.decoding='async';
+ nm.textContent=item.name;ph.append(im);el.append(ph,nm);
+ el.onclick=()=>{
+  if(el.classList.contains('busy'))return;
+  document.querySelectorAll('.card.on').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on','busy');
+  openCfg({id:item.id,name:item.name,src:item.src,cat:'modelo'},()=>el.classList.remove('busy'));
+ };
+ return{el,im,item,key:norm(item.name)}});
+$('gal').replaceChildren(...cards.map(c=>c.el));
+
+/* Carregamento sob demanda: só as miniaturas perto da área visível são baixadas (margem de 300px). */
+const byEl=new Map(cards.map(c=>[c.el,c])),
+ io='IntersectionObserver'in window?new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;io.unobserve(e.target);loadThumb(byEl.get(e.target))}),{root:$('home'),rootMargin:'300px 0px'}):null;
+cards.forEach(c=>{if(io)io.observe(c.el);else{c.im.loading='lazy';loadThumb(c)}});
+
 function render(){
- const q=norm($('q').value);
- const cards=items.filter(i=>norm(i.name).includes(q)).map(i=>{
-  const b=document.createElement('button'),n=document.createElement('span');
-  b.className='card';
-  b.innerHTML='<span class="ph"><img alt="" loading="lazy" decoding="async"></span>';
-  n.textContent=i.name;
-  b.append(n);
-
-  const im=b.querySelector('img');
-  im.alt=i.name;
-  im.onload=()=>{b.classList.remove('bad');b.classList.add('ok')};
-  im.onerror=()=>b.classList.add('bad');
-  im.src=i.src;
-
-  b.onclick=()=>{
-   document.querySelectorAll('.card.on').forEach(c=>c.classList.remove('on'));
-   b.classList.add('on');
-   openCfg({id:i.id,name:i.name,src:i.src,cat:'modelo'});
-  };
-  return b;
- });
- $('gal').replaceChildren(...cards);
- $('gm').textContent=items.length?'':'Nenhuma imagem encontrada.';
+ const q=norm($('q').value.trim());let n=0;
+ for(const c of cards){const v=!q||c.key.includes(q);c.el.hidden=!v;n+=v}
+ $('gm').textContent=n?'':'Nenhuma imagem encontrada.';
 }
 $('q').oninput=render;
 render();
@@ -271,9 +300,9 @@ const MOB=/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)||(navigat
 /* configuração */
 function grid(n,w,h){let best,bc=1e9;for(let c=1;c<=n;c++)for(let r=1;r<=n;r++){const m=c*r;if(m<n*.8||m>n*1.25)continue;const k=Math.abs(Math.log(w/c/(h/r)))*4+Math.abs(m-n)/n;if(k<bc){bc=k;best=[c,r]}}return best}
 const upd=()=>{const[c,r]=grid(+$('np').value,cur.w,cur.h);$('real').textContent=`Serão geradas ${c*r} peças (${c} × ${r}).`};
-function openCfg(it){const im=new Image();im.onload=()=>{cur={...it,w:im.naturalWidth,h:im.naturalHeight};$('ct').textContent=cur.name;$('ci').src=cur.src;
- $('np').innerHTML=CFG.counts.map(n=>`<option>${n}</option>`).join('');$('np').value=N0;upd();$('cfg').showModal()};
- im.onerror=()=>alert('Não foi possível carregar esta imagem.');im.src=it.src}
+function openCfg(it,done){const im=new Image(),end=()=>done&&done();im.onload=()=>{cur={...it,w:im.naturalWidth,h:im.naturalHeight};$('ct').textContent=cur.name;$('ci').src=cur.src;
+ $('np').innerHTML=CFG.counts.map(n=>`<option>${n}</option>`).join('');$('np').value=N0;upd();end();$('cfg').showModal()};
+ im.onerror=()=>{end();alert('Não foi possível carregar esta imagem.')};im.src=it.src}
 $('np').onchange=upd;
 $('go').onclick=()=>{N0=+$('np').value;chal=$('ch').checked;$('cfg').close();begin()};
 /* geometria: bordas compartilhadas (Bézier) */

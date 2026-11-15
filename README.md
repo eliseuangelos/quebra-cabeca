@@ -40,8 +40,10 @@ Além do modo clássico, o jogo oferece um modo desafio com rotação das peças
 ### Galeria de imagens
 
 - Galeria com imagens cadastradas no projeto.
-- Busca por nome para localizar imagens disponíveis.
-- Miniaturas com carregamento sob demanda (`loading="lazy"`).
+- Busca por nome para localizar imagens disponíveis (sem recarregar as miniaturas a cada letra digitada).
+- Miniaturas leves em WebP (cerca de 25 a 30 KB cada), geradas a partir dos desenhos originais.
+- Carregamento sob demanda: só as miniaturas próximas da área visível são baixadas, o que mantém a página leve mesmo com muitos desenhos.
+- Cada card reserva o espaço da imagem e exibe um brilho suave de carregamento; a miniatura só aparece, com transição, depois de carregada por completo.
 - Nome da imagem exibido sem depender da extensão do arquivo.
 - Pré-visualização da imagem antes do início da partida.
 
@@ -77,9 +79,27 @@ Além do modo clássico, o jogo oferece um modo desafio com rotação das peças
 - Use `Tab` para alternar o foco entre as peças soltas e `Shift + Tab` para retornar aos controles.
 - As setas do teclado movimentam a peça em foco; `Shift` permite passos maiores.
 
-## Catálogo de imagens: funcionamento atual
+## Catálogo de imagens e miniaturas
 
 As imagens da galeria são cadastradas manualmente no vetor `FILES`, localizado no arquivo `index.html`. Cada registro contém um identificador, o nome que será mostrado na tela e o caminho da imagem dentro de `public/images/puzzles/`. A ordem dos registros define a ordem de exibição.
+
+Os cards da galeria usam **miniaturas** (`public/images/thumbs/`) em vez dos desenhos originais, que têm cerca de 2 MB cada. O desenho original só é carregado quando a pessoa clica no card para jogar.
+
+### Como adicionar um novo desenho
+
+1. Salve a imagem em `public/images/puzzles/` (nome em minúsculas, com hifens e sem acentos, por exemplo `jonas-e-a-baleia.png`).
+2. Gere a miniatura com o script do projeto (requer Python 3 e a biblioteca Pillow):
+
+   ```bash
+   python3 -m pip install pillow        # apenas na primeira vez
+   python3 tools/gerar-miniaturas.py
+   ```
+
+   O script cria `public/images/thumbs/jonas-e-a-baleia.webp`, ignora as miniaturas que já estão em dia e mostra o bloco pronto para colar no `FILES` para as imagens ainda não cadastradas. Use `--forcar` para refazer todas as miniaturas.
+3. Cole o bloco no vetor `FILES` do `index.html` e ajuste o campo `name` (acentos e maiúsculas).
+4. Envie para o repositório as pastas `public/images/puzzles/` e `public/images/thumbs/` junto com o `index.html`.
+
+A miniatura é localizada automaticamente: mesmo nome do arquivo, extensão `.webp`, pasta `thumbs`. Se ela estiver ausente, o card usa a imagem original (mais pesada) e registra um aviso no console do navegador.
 
 ## Tecnologias e recursos
 
@@ -90,7 +110,7 @@ As imagens da galeria são cadastradas manualmente no vetor `FILES`, localizado 
 | JavaScript | Geração das peças, movimentação, encaixe, agrupamento e regras. |
 | Pointer Events | Entrada de mouse, toque e caneta. |
 | `clip-path` e curvas Bézier | Geometria visual dos contornos e encaixes das peças. |
-| `loading="lazy"` | Carregamento sob demanda das miniaturas. |
+| `IntersectionObserver` e WebP | Carregamento sob demanda de miniaturas leves, com efeito de carregamento e transição suave. |
 | localStorage | Persistência local do tema, som e resultados do placar. |
 | GitHub Pages | Hospedagem estática do jogo. |
 
