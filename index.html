@@ -206,46 +206,131 @@ $('ms').onclick=()=>{rs();modal('sd')};$('mh').onclick=()=>modal('hd');$('mc').o
   - A ordem dos itens abaixo determina a ordem de exibição na galeria.
 */
 const FILES=[
- {
-  id:'a-arca-de-noe',
-  name:'A Arca de Noé',
-  src:'public/images/puzzles/a-arca-de-noe.png'
- },
- {
-  id:'moises-no-mar-vermelho',
-  name:'Moisés no Mar Vermelho',
-  src:'public/images/puzzles/moises-no-mar-vermelho.png'
- },
- {
-  id:'davi-e-golias',
-  name:'Davi e Golias',
-  src:'public/images/puzzles/davi-e-golias.png'
-  },
- {
-  id:'daniel-na-cova-dos-leoes',
-  name:'Daniel na Cova dos Leões',
-  src:'public/images/puzzles/daniel-na-cova-dos-leoes.png'
- },
- {
-  id:'nascimento-de-jesus',
-  name:'Nascimento de Jesus',
-  src:'public/images/puzzles/nascimento-de-jesus.png'
- },
- {
-  id:'multiplicacao-paes-e-peixes',
-  name:'Multiplicação Pães e Peixes',
-  src:'public/images/puzzles/multiplicacao-paes-e-peixes.png'
- },
- {
-  id:'jesus-acalma-a-tempestade',
-  name:'Jesus Acalma a Tempestade',
-  src:'public/images/puzzles/jesus-acalma-a-tempestade.png'
- },
- {
-  id:'criancas-brincando-no-parque',
-  name:'Crianças Brincando',
-  src:'public/images/puzzles/criancas-brincando-no-parque.png'
- }
+{
+id:'genesis-1',
+name:'Genesis 1',
+src:'public/images/puzzles/genesis-1.png'
+},
+{
+id:'adao-e-eva',
+name:'Adao e eva',
+src:'public/images/puzzles/adao-e-eva.png'
+},
+{
+id:'a-arca-de-noe',
+name:'A Arca de Noé',
+src:'public/images/puzzles/a-arca-de-noe.png'
+},
+{
+id:'torre-de-babel',
+name:'Torre de babel',
+src:'public/images/puzzles/torre-de-babel.png'
+},
+{
+id:'abraao-contemplando-as-estrelas',
+name:'Abraao contemplando as estrelas',
+src:'public/images/puzzles/abraao-contemplando-as-estrelas.png'
+},
+{
+id:'moises-no-nilo',
+name:'Moises no nilo',
+src:'public/images/puzzles/moises-no-nilo.png'
+},
+{
+id:'moises-e-a-sarca',
+name:'Moises e a sarca',
+src:'public/images/puzzles/moises-e-a-sarca.png'
+},
+{
+id:'moises-no-mar-vermelho',
+name:'Moisés no Mar Vermelho',
+src:'public/images/puzzles/moises-no-mar-vermelho.png'
+},
+{
+id:'moises-e-as-tabuas',
+name:'Moises e as tabuas',
+src:'public/images/puzzles/moises-e-as-tabuas.png'
+},
+{
+id:'muralhas-de-jerico',
+name:'Muralhas de jerico',
+src:'public/images/puzzles/muralhas-de-jerico.png'
+},
+{
+id:'elias-e-o-altar-em-chamas',
+name:'Elias e o altar em chamas',
+src:'public/images/puzzles/elias-e-o-altar-em-chamas.png'
+},
+{
+id:'davi-e-golias',
+name:'Davi e Golias',
+src:'public/images/puzzles/davi-e-golias.png'
+},
+{
+id:'salomao-julgando',
+name:'Salomao julgando',
+src:'public/images/puzzles/salomao-julgando.png'
+},
+{
+id:'fornalha-ardente',
+name:'Fornalha ardente',
+src:'public/images/puzzles/fornalha-ardente.png'
+},
+{
+id:'daniel-na-cova-dos-leoes',
+name:'Daniel na Cova dos Leões',
+src:'public/images/puzzles/daniel-na-cova-dos-leoes.png'
+},
+{
+id:'ester-no-palacio',
+name:'Ester no palacio',
+src:'public/images/puzzles/ester-no-palacio.png'
+},
+{
+id:'jonas-e-o-grande-peixe',
+name:'Jonas e o grande peixe',
+src:'public/images/puzzles/jonas-e-o-grande-peixe.png'
+},
+{
+id:'nascimento-de-jesus',
+name:'Nascimento de Jesus',
+src:'public/images/puzzles/nascimento-de-jesus.png'
+},
+{
+id:'reis-magos',
+name:'Reis magos',
+src:'public/images/puzzles/reis-magos.png'
+},
+{
+id:'jovem-jesus',
+name:'Jovem jesus',
+src:'public/images/puzzles/jovem-jesus.png'
+},
+{
+id:'batismo-de-jesus',
+name:'Batismo de jesus',
+src:'public/images/puzzles/batismo-de-jesus.png'
+},
+{
+id:'multiplicacao-paes-e-peixes',
+name:'Multiplicação Pães e Peixes',
+src:'public/images/puzzles/multiplicacao-paes-e-peixes.png'
+},
+{
+id:'jesus-acalma-a-tempestade',
+name:'Jesus Acalma a Tempestade',
+src:'public/images/puzzles/jesus-acalma-a-tempestade.png'
+},
+{
+id:'jesus-sobre-as-aguas',
+name:'Jesus sobre as aguas',
+src:'public/images/puzzles/jesus-sobre-as-aguas.png'
+},
+{
+id:'criancas-brincando-no-parque',
+name:'Crianças Brincando',
+src:'public/images/puzzles/criancas-brincando-no-parque.png'
+}
 ];
 
 items=FILES.map(image=>({...image}));
